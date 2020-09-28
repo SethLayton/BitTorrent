@@ -2,15 +2,19 @@ import java.net.*;
 import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
+import java.nio.charset.*;
 import java.util.*;
 
 public class Client 
 {
 	Socket requestSocket;           //socket connect to the server
-	ObjectOutputStream out;         //stream write to the socket
- 	ObjectInputStream in;          //stream read from the socket
+	DataOutputStream out;         //stream write to the socket
+ 	DataInputStream in;          //stream read from the socket
 	String message;                //message send to the server
 	String MESSAGE;                //capitalized message read from the server
+	Charset charset = StandardCharsets.UTF_16;
+	byte handshake[] = "P2PFILESHARINGPROJ00000000000001".getBytes(charset);
+	
 
 	public void Client() {}
 
@@ -22,41 +26,43 @@ public class Client
 			requestSocket = new Socket("localhost", 8000);
 			System.out.println("Connected to localhost in port 8000");
 			//initialize inputStream and outputStream
-			out = new ObjectOutputStream(requestSocket.getOutputStream());
+			out = new DataOutputStream(requestSocket.getOutputStream());
 			out.flush();
-			in = new ObjectInputStream(requestSocket.getInputStream());
-			
-			//get Input from standard input
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+			in = new DataInputStream(requestSocket.getInputStream());
+
+			//System.out.println("MESSAGE= " + MESSAGE);
 			while(true)
 			{
-				System.out.print("Hello, please input a sentence: ");
-				//read a sentence from the standard input
-				message = bufferedReader.readLine();
-				//Send the sentence to the server
-				sendMessage(message);
-				//Receive the upperCase sentence from the server
-				MESSAGE = (String)in.readObject();
-				//show the message to the user
-				System.out.println("Receive message: " + MESSAGE);
-			}
+				if(MESSAGE == null || !MESSAGE.equals("OK"))
+				{
+					//System.out.println(new String(handshake, charset));
+					sendMessage(handshake);
+					byte[] recdata;
+					int length = in.readInt();
+					if(length>0) 
+					{
+						recdata = new byte[length];
+						in.readFully(recdata, 0, recdata.length);
+						MESSAGE = new String(recdata, charset);
+					}
+					//System.out.println("Receive message: " + MESSAGE);
+					if (MESSAGE.equals("OK"))
+						System.out.println("Connection Established");
+				}
+				else
+				{					
+					//Do some file transfer stuff here
+				}				
+			}	
 		}
         catch (ConnectException e) 
         {
             System.err.println("Connection refused. You need to initiate a server first.");
 		} 
-        catch ( ClassNotFoundException e ) 
+        catch (Exception e ) 
         {
-                System.err.println("Class not found");
+                System.err.println("Error: " + e.getMessage() + "\n" + e.getStackTrace());
         } 
-        catch(UnknownHostException unknownHost)
-        {
-			System.err.println("You are trying to connect to an unknown host!");
-		}
-        catch(IOException ioException)
-        {
-			ioException.printStackTrace();
-		}
         finally
         {
 			//Close connections
@@ -72,13 +78,15 @@ public class Client
 			}
 		}
 	}
+	
 	//send a message to the output stream
-	void sendMessage(String msg)
+	void sendMessage(byte[] msg)
 	{
         try
         {
 			//stream write the message
-			out.writeObject(msg);
+			out.writeInt(msg.length);
+			out.write(msg);
 			out.flush();
 		}
         catch(IOException ioException)
