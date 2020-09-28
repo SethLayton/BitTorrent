@@ -1,19 +1,18 @@
 import java.net.*;
 import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.util.*;
+import java.nio.charset.*;
 
 public class Server 
 {
 
+    
 	private static final int sPort = 8000;   //The server will be listening on this port number
 
     public static void main(String[] args) throws Exception 
     {
 		System.out.println("The server is running."); 
         ServerSocket listener = new ServerSocket(sPort);
-		int clientNum = 1;
+        int clientNum = 1;
         try 
         {
             while(true) 
@@ -37,11 +36,11 @@ public class Server
     private static class Handler extends Thread 
     {
         private String message;    //message received from the client
-        private String MESSAGE;    //uppercase message send to the client
         private Socket connection;
-        private ObjectInputStream in;	//stream read from the socket
-        private ObjectOutputStream out;    //stream write to the socket
+        private DataInputStream in;	//stream read from the socket
+        private DataOutputStream out;    //stream write to the socket
         private int no;		//The index number of the client
+        Charset charset = StandardCharsets.UTF_16;
 
         public Handler(Socket connection, int no) 
         {
@@ -53,62 +52,81 @@ public class Server
         {
             try
             {
-            //initialize Input and Output streams
-            out = new ObjectOutputStream(connection.getOutputStream());
-            out.flush();
-            in = new ObjectInputStream(connection.getInputStream());
-            try
-            {
-                while(true)
+                //initialize Input and Output streams
+                out = new DataOutputStream(connection.getOutputStream());
+                out.flush();
+                in = new DataInputStream(connection.getInputStream());
+                try
                 {
-                    //receive the message sent from the client
-                    message = (String)in.readObject();
-                    //show the message to the user
-                    System.out.println("Receive message: " + message + " from client " + no);
-                    //Capitalize all letters in the message
-                    MESSAGE = message.toUpperCase();
-                    //send MESSAGE back to the client
-                    sendMessage(MESSAGE);
+                    while(true)
+                    {
+                        //receive the message sent from the client
+                        int length = in.readInt();
+                        byte[] data;
+                        if(length>0) 
+                        {
+                            data = new byte[length];
+                            in.readFully(data, 0, data.length);
+                            message = new String(data, charset);
+                             //show the message to the user
+                            System.out.println("Receive message: " + message + " from client " + no);
+                            if(message.contains("P2PFILESHARINGPROJ"))
+                            {
+                                sendMessage("OK".getBytes(charset));
+                            }
+                            else
+                            {
+                                sendMessage(message.toUpperCase().getBytes(charset));
+                            }                            
+                        }
+                        else
+                        {
+                            sendMessage("Handshake of length 0 received".getBytes(charset));
+                        }
+                        
+                       
+                    }
                 }
-            }
-            catch(ClassNotFoundException classnot)
-            {
-                System.err.println("Data received in unknown format");
-            }
-        }
-        catch(IOException ioException)
-        {
-            System.out.println("Disconnect with Client " + no);
-        }
-        finally
-        {
-            //Close connections
-            try
-            {
-                in.close();
-                out.close();
-                connection.close();
+                catch(Exception e)
+                {
+                    System.err.println("Error: " + e.getMessage() + "\n");
+                }
             }
             catch(IOException ioException)
             {
                 System.out.println("Disconnect with Client " + no);
             }
+            finally
+            {
+                //Close connections
+                try
+                {
+                    in.close();
+                    out.close();
+                    connection.close();
+                }
+                catch(IOException ioException)
+                {
+                    System.out.println("Disconnect with Client " + no);
+                }
+            }
         }
-	}
-
-	//send a message to the output stream
-	public void sendMessage(String msg)
-	{
-        try
+        
+       
+        //send a message to the output stream
+        public void sendMessage(byte[] msg)
         {
-			out.writeObject(msg);
-			out.flush();
-			System.out.println("Send message: " + msg + " to Client " + no);
-		}
-        catch(IOException ioException)
-        {
-			ioException.printStackTrace();
-		}
-	}
-
+            try
+            {
+                out.writeInt(msg.length);
+                out.write(msg);
+                out.flush();
+                System.out.println("Send message: " + new String(msg, charset) + " to Client " + no);
+            }
+            catch(IOException ioException)
+            {
+                ioException.printStackTrace();
+            }
+        }
+    }
 }
