@@ -1,15 +1,22 @@
 import java.net.*;
 import java.io.*;
 import java.nio.charset.*;
+import java.util.Properties;
 
 public class Server 
 {
-
-    
 	private static final int sPort = 8000;   //The server will be listening on this port number
+    private static String NumberOfPreferredNeighbors;
+    private static Integer UnchokingInterval;
+    private static Integer OptimisticUnchokingInterval;
+    private static String FileName;
+    private static Long FileSize;
+    private static Long PieceSize;
 
     public static void main(String[] args) throws Exception 
     {
+        loadproperties();
+        System.out.println(FileName);
 		System.out.println("The server is running."); 
         ServerSocket listener = new ServerSocket(sPort);
         int clientNum = 1;
@@ -29,6 +36,24 @@ public class Server
  
     }
 
+    private static void loadproperties()
+    {
+        Properties properties = new Properties();
+        try 
+        {
+            properties.load(new FileInputStream("BitTorrentProject/Common.cfg"));
+            NumberOfPreferredNeighbors = properties.get("NumberOfPreferredNeighbors").toString();
+            UnchokingInterval = Integer.parseInt(properties.get("UnchokingInterval").toString());
+            OptimisticUnchokingInterval = Integer.parseInt(properties.get("OptimisticUnchokingInterval").toString());
+            FileName = properties.get("FileName").toString();
+            FileSize = Long.parseLong(properties.get("FileSize").toString());
+            PieceSize = Long.parseLong(properties.get("PieceSize").toString());
+        } 
+        catch (IOException e) 
+        {
+            e.printStackTrace();
+        }
+    }
 	/**
     * A handler thread class.  Handlers are spawned from the listening
     * loop and are responsible for dealing with a single client's requests.
