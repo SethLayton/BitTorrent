@@ -45,7 +45,7 @@ public class Common
                 FileSize = Long.parseLong(comProperties.get("FileSize").toString());
                 PieceSize = Long.parseLong(comProperties.get("PieceSize").toString());
                 localtest = java.net.InetAddress.getLocalHost().toString().split("/")[0].equals("DESKTOP-5N80JFQ");
-
+                
                 _cinit = true;
             }   
             
