@@ -12,9 +12,8 @@ public class peerProcess
 {
     public static void main(String[] args) throws Exception 
     {
-        PeerInfo Peer = PeerInfo.getPeerInfo(java.net.InetAddress.getLocalHost().toString().split("/")[0]);
+        PeerInfo.getPeerInfo(java.net.InetAddress.getLocalHost().toString().split("/")[0]);
 		System.out.println("The server is running."); 
-        ServerSocket listener = new ServerSocket(Peer.getPortNumber());
         // System.out.println("1: " + Peer.getPeerId()); 
         // System.out.println("2: " + Peer.getHostName()); 
         // System.out.println("3: " + Peer.getPortNumber()); 
@@ -35,12 +34,36 @@ public class peerProcess
         //     System.out.println("\n");
         // } 
         Log.Write("The server is running for: " + PeerInfo.MyHostName);
+        try
+        {
+            if(PeerInfo.MyPeerId != Common.GetSmallestPeerId())
+            {
+                //connect to all the previous peers
+                for (PeerInfo p : Common.getPeerInfo()) 
+                {   
+                    if (p.PeerId < PeerInfo.MyPeerId) 
+                    {                
+                        Client client = new Client();
+                        client.run(p);
+                    }
+                }
+                
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Write("Error: " + e.getMessage() + System.lineSeparator() + e.getStackTrace());
+        }
+        
+        //open connection for future peers to connect
+        ServerSocket listener = new ServerSocket(PeerInfo.MyPortNumber);
         try 
         {
             while(true) 
             {
-                new Handler(listener.accept(),Peer.getPeerId()).start();
+                new Handler(listener.accept()).start();
             }
+            
         } 
         finally 
         {
@@ -59,13 +82,11 @@ public class peerProcess
         private Socket connection;
         private DataInputStream in;	//stream read from the socket
         private DataOutputStream out;    //stream write to the socket
-        private int no;		//The index number of the client
         Charset charset = StandardCharsets.UTF_16;
 
-        public Handler(Socket connection, int no) 
+        public Handler(Socket connection) 
         {
             this.connection = connection;
-            this.no = no;
         }
 
         public void run() 
@@ -89,7 +110,7 @@ public class peerProcess
                             in.readFully(data, 0, data.length);
                             message = new String(data, charset);
                              //show the message to the user
-                            System.out.println("Receive message: " + message + " from client " + no);
+                            System.out.println("Receive message: " + message);
                             if(message.contains("P2PFILESHARINGPROJ"))
                             {
                                 sendMessage("OK".getBytes(charset));
@@ -114,7 +135,7 @@ public class peerProcess
             }
             catch(IOException ioException)
             {
-                System.out.println("Disconnect with Client " + no);
+                System.out.println("Disconnect with Client ");
             }
             finally
             {
@@ -127,7 +148,7 @@ public class peerProcess
                 }
                 catch(IOException ioException)
                 {
-                    System.out.println("Disconnect with Client " + no);
+                    System.out.println("Disconnect with Client ");
                 }
             }
         }
@@ -141,7 +162,7 @@ public class peerProcess
                 out.writeInt(msg.length);
                 out.write(msg);
                 out.flush();
-                System.out.println("Send message: " + new String(msg, charset) + " to Client " + no);
+                System.out.println("Send message: " + new String(msg, charset));
             }
             catch(IOException ioException)
             {

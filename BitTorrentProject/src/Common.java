@@ -1,9 +1,10 @@
 import java.util.Properties;
 import java.io.*;
-import java.io.File; 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Common 
@@ -17,6 +18,7 @@ public class Common
     private static Long FileSize;
     private static Long PieceSize;
     private static List<PeerInfo> Peers = new ArrayList<PeerInfo>();
+    private static List<Integer> PeerIds = new ArrayList<Integer>();
 
     public static String getNumberOfPreferredNeighbors() { loadproperties(); return NumberOfPreferredNeighbors; }
     public static int getUnchokingInterval() { loadproperties(); return UnchokingInterval; }
@@ -25,6 +27,7 @@ public class Common
     public static Long getFileSize() { loadproperties(); return FileSize; }
     public static Long getPieceSize() { loadproperties(); return PieceSize; }
     public static List<PeerInfo> getPeerInfo() {loadpeerinfo(); return Peers; }
+    public static Integer GetSmallestPeerId() {loadpeerinfo(); return Collections.min(PeerIds); }
 
     public static void loadproperties()
     {
@@ -65,6 +68,7 @@ public class Common
                 {
                     String[] data = myReader.nextLine().split(" ");
                     Peers.add(new PeerInfo(data));
+                    PeerIds.add(Integer.parseInt(data[0]));
                 }
                 myReader.close();
 

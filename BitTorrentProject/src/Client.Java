@@ -1,6 +1,7 @@
 import java.net.*;
 import java.io.*;
 import java.nio.charset.*;
+import java.text.MessageFormat;
 
 public class Client 
 {
@@ -12,16 +13,13 @@ public class Client
 	Charset charset = StandardCharsets.UTF_16;
 	byte handshake[] = "P2PFILESHARINGPROJ00000000000001".getBytes(charset);
 	
-
-	public void Client() {}
-
-	void run()
+	void run(PeerInfo p)
 	{
         try
         {
 			//create a socket to connect to the server
-			requestSocket = new Socket("localhost", 8000);
-			System.out.println("Connected to localhost in port 8000");
+			requestSocket = new Socket(p.HostName, p.PortNumber);
+			System.out.println(MessageFormat.format("Connected to {0} on port: {1}", p.HostName, p.PortNumber));
 			//initialize inputStream and outputStream
 			out = new DataOutputStream(requestSocket.getOutputStream());
 			out.flush();
@@ -90,11 +88,5 @@ public class Client
         {
 			ioException.printStackTrace();
 		}
-	}
-	//main method
-	public static void main(String args[])
-	{
-		Client client = new Client();
-		client.run();
 	}
 }
