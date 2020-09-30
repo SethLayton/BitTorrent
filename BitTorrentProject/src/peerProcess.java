@@ -42,13 +42,16 @@ public class peerProcess
                 for (PeerInfo p : Common.getPeerInfo()) 
                 {   
                     if (p.PeerId < PeerInfo.MyPeerId) 
-                    {                
+                    {   
+                        System.out.println("Attempting to connect to client: " + p.PeerId + " " + p.HostName);             
                         Client client = new Client();
                         client.run(p);
                     }
                 }
                 
             }
+            else
+                System.out.println("First client running");
         }
         catch (Exception e)
         {

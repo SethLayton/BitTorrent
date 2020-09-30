@@ -9,6 +9,7 @@ import java.util.List;
 
 public class Common 
 {
+    private static boolean localtest= false;
     private static boolean _cinit = false;
     private static boolean _pinit = false;
     private static String NumberOfPreferredNeighbors;
@@ -43,7 +44,8 @@ public class Common
                 FileName = comProperties.get("FileName").toString();
                 FileSize = Long.parseLong(comProperties.get("FileSize").toString());
                 PieceSize = Long.parseLong(comProperties.get("PieceSize").toString());
-                                
+                localtest = java.net.InetAddress.getLocalHost().toString().split("/")[0].equals("DESKTOP-5N80JFQ");
+
                 _cinit = true;
             }   
             
@@ -58,10 +60,11 @@ public class Common
     {
         try 
         {
+            loadproperties();
             if (!_pinit)
             {
                 //String localMachine = java.net.InetAddress.getLocalHost().toString().split("/")[0]; 
-                File myObj = new File("BitTorrentProject/PeerInfo.cfg");
+                File myObj = new File(localtest ? "BitTorrentProject/PeerInfo.cfg" : "../PeerInfo.cfg");
                 Scanner myReader = new Scanner(myObj);
                 //int listid = 0;
                 while (myReader.hasNextLine()) 
