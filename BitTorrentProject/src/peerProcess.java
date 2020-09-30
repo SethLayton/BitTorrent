@@ -15,25 +15,26 @@ public class peerProcess
         PeerInfo Peer = PeerInfo.getPeerInfo(java.net.InetAddress.getLocalHost().toString().split("/")[0]);
 		System.out.println("The server is running."); 
         ServerSocket listener = new ServerSocket(Peer.getPortNumber());
-        System.out.println("1: " + Peer.getPeerId()); 
-        System.out.println("2: " + Peer.getHostName()); 
-        System.out.println("3: " + Peer.getPortNumber()); 
-        System.out.println("4: " + Peer.getHasFile()); 
-        System.out.println("11: " + Common.getNumberOfPreferredNeighbors()); 
-        System.out.println("22: " + Common.getOptimisticUnchokingInterval()); 
-        System.out.println("33: " + Common.getUnchokingInterval()); 
-        System.out.println("44: " + Common.getFileName()); 
-        System.out.println("55: " + Common.getFileSize()); 
-        System.out.println("66: " + Common.getPieceSize());
-        System.out.println("\n");
-        for (PeerInfo p : Common.getPeerInfo()) 
-        {
-            System.out.println("L1: " + p.PeerId); 
-            System.out.println("L2: " + p.HostName); 
-            System.out.println("L3: " + p.PortNumber); 
-            System.out.println("L4: " + p.HasFile); 
-            System.out.println("\n");
-        } 
+        // System.out.println("1: " + Peer.getPeerId()); 
+        // System.out.println("2: " + Peer.getHostName()); 
+        // System.out.println("3: " + Peer.getPortNumber()); 
+        // System.out.println("4: " + Peer.getHasFile()); 
+        // System.out.println("11: " + Common.getNumberOfPreferredNeighbors()); 
+        // System.out.println("22: " + Common.getOptimisticUnchokingInterval()); 
+        // System.out.println("33: " + Common.getUnchokingInterval()); 
+        // System.out.println("44: " + Common.getFileName()); 
+        // System.out.println("55: " + Common.getFileSize()); 
+        // System.out.println("66: " + Common.getPieceSize());
+        // System.out.println("\n");
+        // for (PeerInfo p : Common.getPeerInfo()) 
+        // {
+        //     System.out.println("L1: " + p.PeerId); 
+        //     System.out.println("L2: " + p.HostName); 
+        //     System.out.println("L3: " + p.PortNumber); 
+        //     System.out.println("L4: " + p.HasFile); 
+        //     System.out.println("\n");
+        // } 
+        Log.Write("The server is running for: " + PeerInfo.MyHostName);
         try 
         {
             while(true) 

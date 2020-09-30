@@ -6,6 +6,11 @@ public class PeerInfo
     public String HostName;
     public int PortNumber;
     public boolean HasFile;
+    private static boolean _init = false;
+    public static int MyPeerId;
+    public static String MyHostName;
+    public static int MyPortNumber;
+    public static boolean MyHasFile;
 
     public int getPeerId() { return PeerId; }
     public String getHostName() { return HostName; }
@@ -18,7 +23,17 @@ public class PeerInfo
         for (PeerInfo pInfo: temp) 
         {
             if(pInfo.HostName.equals(hostname))
+            {
+                if (!_init)
+                {
+                    MyPeerId = pInfo.PeerId;
+                    MyHostName = pInfo.HostName;
+                    MyPortNumber = pInfo.PortNumber;
+                    MyHasFile = pInfo.HasFile;
+                }
+            
                 return pInfo;
+            }
         }
         //Log out that we are returning null here
         return null; 

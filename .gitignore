@@ -6,3 +6,4 @@ BitTorrentProject/src/.vscode/launch.json
 BitTorrentProject/src/Client.class
 BitTorrentProject/src/Server.class
 BitTorrentProject/src/Server$Handler.class
+*.log
