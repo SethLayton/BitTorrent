@@ -1,3 +1,4 @@
+import java.util.BitSet;
 import java.util.List;
 
 public class PeerInfo
@@ -11,6 +12,7 @@ public class PeerInfo
     public static String MyHostName;
     public static int MyPortNumber;
     public static boolean MyHasFile;
+    public static BitSet FileBits;
 
     public int getPeerId() { return PeerId; }
     public String getHostName() { return HostName; }
@@ -26,10 +28,16 @@ public class PeerInfo
             {
                 if (!_init)
                 {
+                    BitSet init = new BitSet(80);
                     MyPeerId = pInfo.PeerId;
                     MyHostName = pInfo.HostName;
                     MyPortNumber = pInfo.PortNumber;
                     MyHasFile = pInfo.HasFile;
+                    if (MyHasFile)
+                    {
+                        init.flip(0,79);
+                    }
+                    FileBits = init;
                 }
             
                 return pInfo;

@@ -5,14 +5,15 @@ import java.text.MessageFormat;
 
 public class Client 
 {
-	Socket requestSocket;           //socket connect to the server
-	DataOutputStream out;         //stream write to the socket
- 	DataInputStream in;          //stream read from the socket
+	Socket requestSocket;          //socket connect to the server
+	DataOutputStream out;          //stream write to the socket
+ 	DataInputStream in;            //stream read from the socket
 	String message;                //message send to the server
 	String MESSAGE;                //capitalized message read from the server
 	Charset charset = StandardCharsets.UTF_16;
 	byte handshakeheader[] = "P2PFILESHARINGPROJ".getBytes(charset);
-	byte handshakezbits[];
+	byte handshakezbits[] = "0000000000".getBytes(charset);
+	byte handshakepid[];
 	
 	//public void Client(){}
 
@@ -20,7 +21,7 @@ public class Client
 	{
         try
         {	
-			//Need to set bits to 1 if hasfile = 1 and 0 otherwise, on client connection
+			handshakepid = Integer.toString(p.PeerId).getBytes(charset);
 			System.out.println("Connecting to " + p.HostName + ":" + p.PortNumber);
 			//create a socket to connect to the server
 			requestSocket = new Socket(p.HostName, p.PortNumber);
@@ -36,7 +37,7 @@ public class Client
 				if(MESSAGE == null || !MESSAGE.equals("OK"))
 				{
 					//System.out.println(new String(handshake, charset));
-					sendMessage(handshake);
+					sendMessage(concat(handshakeheader,handshakezbits,handshakepid));
 					byte[] recdata;
 					int length = in.readInt();
 					if(length>0) 
@@ -79,6 +80,29 @@ public class Client
 		}
 	}
 	
+	byte[] concat(byte[]...arrays)
+	{
+		// Determine the length of the result array
+		int totalLength = 0;
+		for (int i = 0; i < arrays.length; i++)
+		{
+			totalLength += arrays[i].length;
+		}
+
+		// create the result array
+		byte[] result = new byte[totalLength];
+
+		// copy the source arrays into the result array
+		int currentIndex = 0;
+		for (int i = 0; i < arrays.length; i++)
+		{
+			System.arraycopy(arrays[i], 0, result, currentIndex, arrays[i].length);
+			currentIndex += arrays[i].length;
+		}
+
+    	return result;
+	}	
+
 	//send a message to the output stream
 	void sendMessage(byte[] msg)
 	{
