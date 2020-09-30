@@ -11,14 +11,16 @@ public class Client
 	String message;                //message send to the server
 	String MESSAGE;                //capitalized message read from the server
 	Charset charset = StandardCharsets.UTF_16;
-	byte handshake[] = "P2PFILESHARINGPROJ00000000000001".getBytes(charset);
+	byte handshakeheader[] = "P2PFILESHARINGPROJ".getBytes(charset);
+	byte handshakezbits[];
 	
 	//public void Client(){}
 
 	void run(PeerInfo p)
 	{
         try
-        {
+        {	
+			//Need to set bits to 1 if hasfile = 1 and 0 otherwise, on client connection
 			System.out.println("Connecting to " + p.HostName + ":" + p.PortNumber);
 			//create a socket to connect to the server
 			requestSocket = new Socket(p.HostName, p.PortNumber);
