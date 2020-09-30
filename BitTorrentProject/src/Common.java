@@ -37,14 +37,15 @@ public class Common
         {
             if (!_cinit)
             {
-                comProperties.load(new FileInputStream("BitTorrentProject/Common.cfg"));                    
+                
+                localtest = java.net.InetAddress.getLocalHost().toString().split("/")[0].equals("DESKTOP-5N80JFQ");
+                comProperties.load(new FileInputStream(localtest ? "BitTorrentProject/Common.cfg" : "../Common.cfg"));                    
                 NumberOfPreferredNeighbors = comProperties.get("NumberOfPreferredNeighbors").toString();
                 UnchokingInterval = Integer.parseInt(comProperties.get("UnchokingInterval").toString());
                 OptimisticUnchokingInterval = Integer.parseInt(comProperties.get("OptimisticUnchokingInterval").toString());
                 FileName = comProperties.get("FileName").toString();
                 FileSize = Long.parseLong(comProperties.get("FileSize").toString());
                 PieceSize = Long.parseLong(comProperties.get("PieceSize").toString());
-                localtest = java.net.InetAddress.getLocalHost().toString().split("/")[0].equals("DESKTOP-5N80JFQ");
                 
                 _cinit = true;
             }   

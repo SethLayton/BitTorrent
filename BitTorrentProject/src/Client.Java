@@ -19,6 +19,7 @@ public class Client
 	{
         try
         {
+			System.out.println("Connecting to " + p.HostName + ":" + p.PortNumber);
 			//create a socket to connect to the server
 			requestSocket = new Socket(p.HostName, p.PortNumber);
 			System.out.println(MessageFormat.format("Connected to {0} on port: {1}", p.HostName, p.PortNumber));
@@ -44,7 +45,7 @@ public class Client
 					}
 					//System.out.println("Receive message: " + MESSAGE);
 					if (MESSAGE.equals("OK"))
-						System.out.println("Connection Established");
+						System.out.println("Handshake complete. Connection established");
 				}
 				else
 				{					
