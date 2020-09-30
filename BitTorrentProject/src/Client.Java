@@ -13,6 +13,8 @@ public class Client
 	Charset charset = StandardCharsets.UTF_16;
 	byte handshake[] = "P2PFILESHARINGPROJ00000000000001".getBytes(charset);
 	
+	//public void Client(){}
+
 	void run(PeerInfo p)
 	{
         try
