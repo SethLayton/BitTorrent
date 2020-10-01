@@ -47,8 +47,8 @@ public class Client
 						MESSAGE = new String(recdata, charset);
 					}
 					//System.out.println("Receive message: " + MESSAGE);
-					if (MESSAGE.equals("OK"))
-						System.out.println("Handshake complete. Connection established");
+					if (MESSAGE.contains(String.valueOf(p.PeerId)))
+						System.out.println("Handshake complete with peer: " + p.PeerId + ". Connection established");
 				}
 				else
 				{					
