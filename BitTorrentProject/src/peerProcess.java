@@ -86,7 +86,7 @@ public class peerProcess
             this.MyPeer = p;
         }
 
-        public void run(PeerInfo MyP) 
+        public void run() 
         {
             try
             {
