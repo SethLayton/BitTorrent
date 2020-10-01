@@ -7,6 +7,7 @@ public class PeerInfo
     public String HostName;
     public int PortNumber;
     public boolean HasFile;
+    public static int Pieces;
     private static boolean _init = false;
     public static int MyPeerId;
     public static String MyHostName;
@@ -28,14 +29,15 @@ public class PeerInfo
             {
                 if (!_init)
                 {
-                    BitSet init = new BitSet(80);
+                    Pieces = (int)(Math.ceil((double)Common.getFileSize()/Common.getPieceSize()));
+                    BitSet init = new BitSet(Pieces);
                     MyPeerId = pInfo.PeerId;
                     MyHostName = pInfo.HostName;
                     MyPortNumber = pInfo.PortNumber;
                     MyHasFile = pInfo.HasFile;
                     if (MyHasFile)
                     {
-                        init.flip(0,79);
+                        init.flip(0,Pieces-1);
                     }
                     FileBits = init;
                 }
