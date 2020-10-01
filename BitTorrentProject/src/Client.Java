@@ -37,7 +37,7 @@ public class Client
 				if(MESSAGE == null || !MESSAGE.equals("OK"))
 				{
 					//System.out.println(new String(handshake, charset));
-					sendMessage(concat(handshakeheader,handshakezbits,handshakepid));
+					sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
 					byte[] recdata;
 					int length = in.readInt();
 					if(length>0) 
@@ -78,29 +78,6 @@ public class Client
 				ioException.printStackTrace();
 			}
 		}
-	}
-	
-	byte[] concat(byte[]...arrays)
-	{
-		// Determine the length of the result array
-		int totalLength = 0;
-		for (int i = 0; i < arrays.length; i++)
-		{
-			totalLength += arrays[i].length;
-		}
-
-		// create the result array
-		byte[] result = new byte[totalLength];
-
-		// copy the source arrays into the result array
-		int currentIndex = 0;
-		for (int i = 0; i < arrays.length; i++)
-		{
-			System.arraycopy(arrays[i], 0, result, currentIndex, arrays[i].length);
-			currentIndex += arrays[i].length;
-		}
-
-    	return result;
 	}	
 
 	//send a message to the output stream

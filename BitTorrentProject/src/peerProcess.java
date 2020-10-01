@@ -12,7 +12,7 @@ public class peerProcess
 {
     public static void main(String[] args) throws Exception 
     {
-        PeerInfo.getPeerInfo(java.net.InetAddress.getLocalHost().toString().split("/")[0]);
+        PeerInfo MyPeer = PeerInfo.getPeerInfo(java.net.InetAddress.getLocalHost().toString().split("/")[0]);
 		
         try
         {
@@ -53,7 +53,7 @@ public class peerProcess
         {
             while(true) 
             {
-                new Handler(listener.accept()).start();
+                new Handler(listener.accept(), MyPeer).start();
             }
             
         } 
@@ -75,13 +75,18 @@ public class peerProcess
         private DataInputStream in;	//stream read from the socket
         private DataOutputStream out;    //stream write to the socket
         Charset charset = StandardCharsets.UTF_16;
+        byte handshakeheader[] = "P2PFILESHARINGPROJ".getBytes(charset);
+        byte handshakezbits[] = "0000000000".getBytes(charset);
+        byte handshakepid[];
+        private PeerInfo MyPeer;
 
-        public Handler(Socket connection) 
+        public Handler(Socket connection, PeerInfo p) 
         {
             this.connection = connection;
+            this.MyPeer = p;
         }
 
-        public void run() 
+        public void run(PeerInfo MyP) 
         {
             try
             {
@@ -102,10 +107,11 @@ public class peerProcess
                             in.readFully(data, 0, data.length);
                             message = new String(data, charset);
                              //show the message to the user
-                            System.out.println("Receive message: " + message);
+                            System.out.println("Receive message: " + message + " from peer: " + message.split("0000000000")[1]);
                             if(message.contains("P2PFILESHARINGPROJ"))
                             {
-                                sendMessage("OK".getBytes(charset));
+                                handshakepid = Integer.toString(MyPeer.PeerId).getBytes(charset);
+                                sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
                             }
                             else
                             {
