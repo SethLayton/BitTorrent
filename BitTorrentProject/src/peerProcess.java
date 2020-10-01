@@ -27,7 +27,7 @@ public class peerProcess
                     //     s.append( p.FileBits.get( i ) == true ? "1" : "0" );
                     //     s.append(" ");
                     // }
-                    System.out.println("HostName: " + p.HostName + " Bits: " + s);
+                    //System.out.println("HostName: " + p.HostName + " Bits: " + s);
                     if (p.PeerId < PeerInfo.MyPeerId) 
                     {   
                         System.out.println("Attempting to connect to client: " + p.PeerId + " " + p.HostName);             
@@ -56,7 +56,7 @@ public class peerProcess
                 new Handler(listener.accept(), MyPeer).start();
             }
             
-        } 
+        }  
         finally 
         {
                 listener.close();
