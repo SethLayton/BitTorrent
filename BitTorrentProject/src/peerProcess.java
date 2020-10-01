@@ -21,6 +21,13 @@ public class peerProcess
                 //connect to all the previous peers
                 for (PeerInfo p : Common.getPeerInfo()) 
                 {   
+                    // StringBuilder s = new StringBuilder();
+                    // for( int i = 0; i < Common.getPiece();  i++ )
+                    // {
+                    //     s.append( p.FileBits.get( i ) == true ? "1" : "0" );
+                    //     s.append(" ");
+                    // }
+                    System.out.println("HostName: " + p.HostName + " Bits: " + s);
                     if (p.PeerId < PeerInfo.MyPeerId) 
                     {   
                         System.out.println("Attempting to connect to client: " + p.PeerId + " " + p.HostName);             

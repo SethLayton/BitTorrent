@@ -56,13 +56,11 @@ public class PeerInfo
             this.PeerId = Integer.parseInt(data[0]);
             this.HostName = data[1];
             this.PortNumber = Integer.parseInt(data[2]);
-            this.HasFile = Boolean.parseBoolean(data[3]);
+            this.HasFile = Boolean.parseBoolean(data[3].equals("1") ? "true" : "false");
 
             BitSet init = new BitSet(Common.getPiece());
             if (this.HasFile)
-            {
-                init.flip(0,Common.getPiece()-1);
-            }
+                init.flip(0,Common.getPiece());
             this.FileBits = init;
         }
         else
