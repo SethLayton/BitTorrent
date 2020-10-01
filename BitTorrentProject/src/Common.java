@@ -18,6 +18,7 @@ public class Common
     private static String FileName;
     private static Long FileSize;
     private static Long PieceSize;
+    private static int Piece;
     private static List<PeerInfo> Peers = new ArrayList<PeerInfo>();
     private static List<Integer> PeerIds = new ArrayList<Integer>();
 
@@ -27,6 +28,7 @@ public class Common
     public static String getFileName() { loadproperties(); return FileName; }
     public static Long getFileSize() { loadproperties(); return FileSize; }
     public static Long getPieceSize() { loadproperties(); return PieceSize; }
+    public static int getPiece() { loadproperties(); return Piece; }
     public static List<PeerInfo> getPeerInfo() {loadpeerinfo(); return Peers; }
     public static Integer GetSmallestPeerId() {loadpeerinfo(); return Collections.min(PeerIds); }
 
@@ -46,6 +48,7 @@ public class Common
                 FileName = comProperties.get("FileName").toString();
                 FileSize = Long.parseLong(comProperties.get("FileSize").toString());
                 PieceSize = Long.parseLong(comProperties.get("PieceSize").toString());
+                Piece = (int)(Math.ceil((double)FileSize/PieceSize));
                 
                 _cinit = true;
             }   
