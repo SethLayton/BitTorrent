@@ -31,6 +31,7 @@ public class Common
     public static int getPiece() { loadproperties(); return Piece; }
     public static List<PeerInfo> getPeerInfo() {loadpeerinfo(); return Peers; }
     public static Integer GetSmallestPeerId() {loadpeerinfo(); return Collections.min(PeerIds); }
+    public static Integer GetLargestPeerId() {loadpeerinfo(); return Collections.max(PeerIds); }
 
     public static void loadproperties()
     {

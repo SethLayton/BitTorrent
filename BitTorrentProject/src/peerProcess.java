@@ -1,12 +1,6 @@
 import java.net.*;
 import java.io.*;
 import java.nio.charset.*;
-// import java.time.Period;
-// import java.util.List;
-// import java.io.File; 
-// import java.io.FileNotFoundException;
-// import java.util.Scanner;
-// import java.util.ArrayList;
 
 public class peerProcess 
 {
@@ -30,9 +24,8 @@ public class peerProcess
                     //System.out.println("HostName: " + p.HostName + " Bits: " + s);
                     if (p.PeerId < PeerInfo.MyPeerId) 
                     {   
-                        System.out.println("Attempting to connect to client: " + p.PeerId + " " + p.HostName);             
-                        Client client = new Client();
-                        client.run(p);
+                        System.out.println("Attempting to connect to client: " + p.PeerId + " " + p.HostName);   
+                        new Client.Handler(p).start();
                     }
                 }                
             }
@@ -44,23 +37,25 @@ public class peerProcess
             Log.Write("Error: " + e.getMessage() + System.lineSeparator() + e.getStackTrace());
         }
         
-        //open connection for future peers to connect
-        ServerSocket listener = new ServerSocket(PeerInfo.MyPortNumber);
-        System.out.println("The server is running."); 
-        Log.Write("The server is running for: " + PeerInfo.MyHostName);
-        try 
+        //open connection for future peers to connect if its not the last to start
+        if (PeerInfo.MyPeerId != Common.GetLargestPeerId())
         {
-            //TODO: if last peer, dont start this
-            while(true) 
+            ServerSocket listener = new ServerSocket(PeerInfo.MyPortNumber);
+            System.out.println("The server is running."); 
+            Log.Write("The server is running for: " + PeerInfo.MyHostName);
+            try 
             {
-                new Handler(listener.accept(), MyPeer).start();
-            }
-            
-        }  
-        finally 
-        {
-                listener.close();
-        } 
+                while(true) 
+                {
+                    new Handler(listener.accept(), MyPeer).start();
+                }
+                
+            }  
+            finally 
+            {
+                    listener.close();
+            } 
+        }
  
     }
     
