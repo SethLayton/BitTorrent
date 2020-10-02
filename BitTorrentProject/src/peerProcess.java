@@ -34,8 +34,7 @@ public class peerProcess
                         Client client = new Client();
                         client.run(p);
                     }
-                }
-                
+                }                
             }
             else
                 System.out.println("First client running");
@@ -51,6 +50,7 @@ public class peerProcess
         Log.Write("The server is running for: " + PeerInfo.MyHostName);
         try 
         {
+            //TODO: if last peer, dont start this
             while(true) 
             {
                 new Handler(listener.accept(), MyPeer).start();
@@ -149,9 +149,7 @@ public class peerProcess
                     System.out.println("Disconnect with Client ");
                 }
             }
-        }
-        
-       
+        }      
         //send a message to the output stream
         public void sendMessage(byte[] msg)
         {

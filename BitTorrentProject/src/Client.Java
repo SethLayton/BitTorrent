@@ -16,7 +16,7 @@ public class Client
 	byte handshakepid[];
 	
 	//public void Client(){}
-
+	
 	void run(PeerInfo p)
 	{
         try
@@ -34,7 +34,7 @@ public class Client
 			//System.out.println("MESSAGE= " + MESSAGE);
 			while(true)
 			{
-				if(MESSAGE == null || !MESSAGE.equals("OK"))
+				if(MESSAGE == null || !MESSAGE.contains(String.valueOf(p.PeerId)))
 				{
 					//System.out.println(new String(handshake, charset));
 					sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
