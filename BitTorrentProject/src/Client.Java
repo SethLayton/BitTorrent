@@ -27,7 +27,7 @@ public class Client
 		{
 			try
 			{	
-				handshakepid = Integer.toString(connectedPeer.PeerId).getBytes(charset);
+				handshakepid = Integer.toString(PeerInfo.MyPeerId).getBytes(charset);
 				System.out.println("Connecting to " + connectedPeer.HostName + ":" + connectedPeer.PortNumber);
 				//create a socket to connect to the server
 				requestSocket = new Socket(connectedPeer.HostName, connectedPeer.PortNumber);
@@ -42,7 +42,7 @@ public class Client
 				{
 					if(MESSAGE == null || !MESSAGE.contains(String.valueOf(connectedPeer.PeerId)))
 					{
-						//System.out.println(new String(handshake, charset));
+						System.out.println(new String(Common.concat(handshakeheader,handshakezbits,handshakepid), charset));
 						sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
 						byte[] recdata;
 						int length = in.readInt();
@@ -65,11 +65,16 @@ public class Client
 						}
 					}				
 				}	
-			}
-			catch (ConnectException e) 
-			{
-				System.err.println("Connection refused. You need to initiate a server first.");
-			} 
+            }
+            catch (SocketException exception) 
+            {
+                // Output expected SocketExceptions.
+                System.err.println(exception);
+            }
+			// catch (ConnectException e) 
+			// {
+			// 	System.err.println("Connection refused. You need to initiate a server first.");
+			// } 
 			catch (Exception e ) 
 			{
                     System.err.println("Error: " + e.getMessage() + "\n");

@@ -115,6 +115,11 @@ public class Common
 		}
 
     	return result;
-	}	
+    }	
+    
+    public static String removeBadFormat (String in)
+    {
+        return in.replaceAll("[^A-Za-z0-9()\\[\\]]", "");
+    }
 }
 
