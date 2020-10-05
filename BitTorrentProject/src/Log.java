@@ -12,7 +12,7 @@ public class Log
     public static String LogPath()
     { 
         if (_logPath == null) 
-            _logPath = "BitTorrentProject/peer_{0}/peer_{0}_{1}.log"; 
+            _logPath = "BitTorrentProject/peer_{0}_{1}.log"; 
         String ret = MessageFormat.format(_logPath, String.valueOf(PeerInfo.MyPeerId), LocalDate.now());
         return ret;
     }

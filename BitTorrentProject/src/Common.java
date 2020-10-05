@@ -9,6 +9,7 @@ import java.util.List;
 
 public class Common 
 {
+    //Singleton variables set on startup
     private static boolean localtest= false;
     private static boolean _cinit = false;
     private static boolean _pinit = false;
@@ -19,6 +20,9 @@ public class Common
     private static Long FileSize;
     private static Long PieceSize;
     private static int Piece;
+
+    //List of PeerInfo that is initialized from the PeerInfo.cfg on startup and then
+    //Updated dynamically while running
     private static List<PeerInfo> Peers = new ArrayList<PeerInfo>();
     private static List<Integer> PeerIds = new ArrayList<Integer>();
 

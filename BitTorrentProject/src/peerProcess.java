@@ -1,6 +1,7 @@
 import java.net.*;
 import java.io.*;
 import java.nio.charset.*;
+import java.text.MessageFormat;
 
 public class peerProcess 
 {
@@ -101,12 +102,16 @@ public class peerProcess
                             data = new byte[length];
                             in.readFully(data, 0, data.length);
                             message = new String(data, charset);
-                             //show the message to the user
-                            System.out.println("Receive message: " + message + " from peer: " + message.split("0000000000")[1]);
+                            //Potential need to change here as splitting could give null exception
+                            PeerInfo connectedPeer = PeerInfo.getPeerInfo(Integer.parseInt(message.split("0000000000")[1]));
+                            //show the message to the user
+                            Log.Write(MessageFormat.format("Peer {0} is connected from Peer {1}", PeerInfo.MyPeerId, connectedPeer.PeerId));
+                            System.out.println("Receive message: " + message + " from peer: " + connectedPeer.PeerId);
                             if(message.contains("P2PFILESHARINGPROJ"))
                             {
                                 handshakepid = Integer.toString(MyPeer.PeerId).getBytes(charset);
                                 sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
+                                //Do some filetransfer stuff here
                             }
                             else
                             {

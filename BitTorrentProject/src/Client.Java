@@ -16,22 +16,22 @@ public class Client
 		byte handshakeheader[] = "P2PFILESHARINGPROJ".getBytes(charset);
 		byte handshakezbits[] = "0000000000".getBytes(charset);
 		byte handshakepid[];
-		private PeerInfo MyPeer;
+		private PeerInfo connectedPeer;
 	
 		public Handler(PeerInfo p) 
         {
-            this.MyPeer = p;
+            this.connectedPeer = p;
         }
 
 		public void run()
 		{
 			try
 			{	
-				handshakepid = Integer.toString(MyPeer.PeerId).getBytes(charset);
-				System.out.println("Connecting to " + MyPeer.HostName + ":" + MyPeer.PortNumber);
+				handshakepid = Integer.toString(connectedPeer.PeerId).getBytes(charset);
+				System.out.println("Connecting to " + connectedPeer.HostName + ":" + connectedPeer.PortNumber);
 				//create a socket to connect to the server
-				requestSocket = new Socket(MyPeer.HostName, MyPeer.PortNumber);
-				System.out.println(MessageFormat.format("Connected to {0} on port: {1}", MyPeer.HostName, MyPeer.PortNumber));
+				requestSocket = new Socket(connectedPeer.HostName, connectedPeer.PortNumber);
+				System.out.println(MessageFormat.format("Connected to {0} on port: {1}", connectedPeer.HostName, connectedPeer.PortNumber));
 				//initialize inputStream and outputStream
 				out = new DataOutputStream(requestSocket.getOutputStream());
 				out.flush();
@@ -40,7 +40,7 @@ public class Client
 				System.out.println("MESSAGE= " + MESSAGE);
 				while(true)
 				{
-					if(MESSAGE == null || !MESSAGE.contains(String.valueOf(MyPeer.PeerId)))
+					if(MESSAGE == null || !MESSAGE.contains(String.valueOf(connectedPeer.PeerId)))
 					{
 						//System.out.println(new String(handshake, charset));
 						sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
@@ -53,12 +53,16 @@ public class Client
 							MESSAGE = new String(recdata, charset);
 						}
 						//System.out.println("Receive message: " + MESSAGE);
-						if (MESSAGE.contains(String.valueOf(MyPeer.PeerId)))
-							System.out.println("Handshake complete with peer: " + MyPeer.PeerId + ". Connection established");
-					}
-					else
-					{					
-						//Do some file transfer stuff here
+						if (MESSAGE.contains(String.valueOf(connectedPeer.PeerId)))
+						{
+							PeerInfo.SetHandshake(connectedPeer.PeerId);
+							Log.Write(MessageFormat.format(" Peer {0} makes a connection to Peer {1}", PeerInfo.MyPeerId, connectedPeer.PeerId));
+							System.out.println("Handshake complete with peer: " + connectedPeer.PeerId + ". Connection established");
+
+							//Do some file transfer stuff here
+							//Send the bitfield message first
+							sendMessage(PeerInfo.MyFileBits.toByteArray());
+						}
 					}				
 				}	
 			}
