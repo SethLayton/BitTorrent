@@ -2,6 +2,7 @@ import java.net.*;
 import java.io.*;
 import java.nio.charset.*;
 import java.text.MessageFormat;
+import java.util.BitSet;
 
 public class peerProcess 
 {
@@ -107,15 +108,27 @@ public class peerProcess
                             //show the message to the user
                             Log.Write(MessageFormat.format("Peer {0} is connected from Peer {1}", PeerInfo.MyPeerId, connectedPeer.PeerId));
                             System.out.println("Receive message: " + message + " from peer: " + connectedPeer.PeerId);
-                            if(message.contains("P2PFILESHARINGPROJ"))
+                            if(message.contains("P2PFILESHARINGPROJ") && !PeerInfo.isHandShake(connectedPeer.PeerId))
                             {
                                 handshakepid = Integer.toString(MyPeer.PeerId).getBytes(charset);
                                 sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
-                                //Do some filetransfer stuff here
+                                
                             }
                             else
                             {
-                                sendMessage(message.toUpperCase().getBytes(charset));
+                                BitSet set = BitSet.valueOf(data);
+                                StringBuilder s = new StringBuilder();
+                                for( int i = 0; i < Common.getPiece();  i++ )
+                                {
+                                    s.append( set.get(i) == true ? "1" : "0" );
+                                    s.append(" ");
+                                }
+                                System.out.println("Receive message (bitfield): " + message + " from peer: " + connectedPeer.PeerId);
+                                //Do some filetransfer stuff here
+                                //Handshake has been successfully created with this peer
+                                //Expect to see the bitfield message here first
+                                //Then we send a bitfield back to the other peer
+                                //sendMessage(message.toUpperCase().getBytes(charset));
                             }                            
                         }
                         else

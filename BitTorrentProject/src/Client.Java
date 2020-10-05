@@ -40,7 +40,7 @@ public class Client
 				System.out.println("MESSAGE= " + MESSAGE);
 				while(true)
 				{
-					if(MESSAGE == null || !MESSAGE.contains(String.valueOf(connectedPeer.PeerId)))
+					if((MESSAGE == null || !MESSAGE.contains(String.valueOf(connectedPeer.PeerId)) && !PeerInfo.isHandShake(connectedPeer.PeerId)))
 					{
 						System.out.println(new String(Common.concat(handshakeheader,handshakezbits,handshakepid), charset));
 						sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
@@ -59,11 +59,14 @@ public class Client
 							Log.Write(MessageFormat.format(" Peer {0} makes a connection to Peer {1}", PeerInfo.MyPeerId, connectedPeer.PeerId));
 							System.out.println("Handshake complete with peer: " + connectedPeer.PeerId + ". Connection established");
 
-							//Do some file transfer stuff here
 							//Send the bitfield message first
 							sendMessage(PeerInfo.MyFileBits.toByteArray());
 						}
-					}				
+                    }
+                    else
+                    {
+                            //Do some file transfer stuff here
+                    }				
 				}	
             }
             catch (SocketException exception) 

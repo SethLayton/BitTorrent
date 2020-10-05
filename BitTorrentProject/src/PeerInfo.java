@@ -129,7 +129,7 @@ public class PeerInfo
         }
     }
 
-    public Boolean isHandShake (Integer peerId)
+    public static Boolean isHandShake (Integer peerId)
     {
         for (Pair<Integer,Boolean> p : hShakeArray) 
         {
