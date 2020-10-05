@@ -72,7 +72,12 @@ public class Client
 			} 
 			catch (Exception e ) 
 			{
-					System.err.println("Error: " + e.getMessage() + "\n" + e.getStackTrace());
+                    System.err.println("Error: " + e.getMessage() + "\n");
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    e.printStackTrace(pw);
+                    String sStackTrace = sw.toString(); // stack trace as a string
+                    System.out.println(sStackTrace);
 			} 
 			finally
 			{
