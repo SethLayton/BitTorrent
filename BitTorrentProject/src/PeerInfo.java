@@ -153,6 +153,7 @@ public class PeerInfo
 
     public static class Pair<L,R> 
     {
+        
         private L left;
         private R right;
 
@@ -180,6 +181,7 @@ public class PeerInfo
         public boolean equals(Object o) 
         {
           if (!(o instanceof Pair)) return false;
+          @SuppressWarnings("unchecked")
           Pair<L,R> pairo = (Pair<L,R>) o;
           return this.left.equals(pairo.getLeft()) &&
                  this.right.equals(pairo.getRight());
