@@ -56,7 +56,7 @@ public class PeerInfo
                     
                     if (MyHasFile)
                     {
-                        init.flip(0,Common.getPiece()-1);
+                        init.flip(0,Common.getPiece());
                     }
                     MyFileBits = init;
                     
@@ -85,7 +85,7 @@ public class PeerInfo
                     MyHasFile = pInfo.HasFile;
                     if (MyHasFile)
                     {
-                        init.flip(0,Common.getPiece()-1);
+                        init.flip(0,Common.getPiece());
                     }
                     MyFileBits = init;
                 }

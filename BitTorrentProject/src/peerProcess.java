@@ -17,13 +17,6 @@ public class peerProcess
                 //connect to all the previous peers
                 for (PeerInfo p : Common.getPeers()) 
                 {   
-                    // StringBuilder s = new StringBuilder();
-                    // for( int i = 0; i < Common.getPiece();  i++ )
-                    // {
-                    //     s.append( p.FileBits.get( i ) == true ? "1" : "0" );
-                    //     s.append(" ");
-                    // }
-                    //System.out.println("HostName: " + p.HostName + " Bits: " + s);
                     if (p.PeerId < PeerInfo.MyPeerId) 
                     {   
                         System.out.println("Attempting to connect to client: " + p.PeerId + " " + p.HostName);   
@@ -104,7 +97,7 @@ public class peerProcess
                             data = new byte[length];
                             in.readFully(data, 0, data.length);
                             message = new String(data, charset);
-                            if(message.contains("P2PFILESHARINGPROJ") && !PeerInfo.isHandShake(connectedPeer.PeerId))
+                            if(message.contains("P2PFILESHARINGPROJ") && (connectedPeer == null || !PeerInfo.isHandShake(connectedPeer.PeerId)))
                             {
                             //Potential need to change here as splitting could give null exception
                             connectedPeer = PeerInfo.getPeerInfo(Integer.parseInt(Common.removeBadFormat(message.split("0000000000")[1])));
@@ -123,14 +116,14 @@ public class peerProcess
                             }
                             else
                             {
-                                BitSet set = BitSet.valueOf(data);
-                                StringBuilder s = new StringBuilder();
-                                for( int i = 0; i < Common.getPiece();  i++ )
-                                {
-                                    s.append( set.get(i) == true ? "1" : "0" );
-                                    s.append(" ");
-                                }
-                                System.out.println("Receive message (bitfield): " + message + " from peer: " + connectedPeer.PeerId);
+                                //BitSet set = BitSet.valueOf(data);
+                                // StringBuilder s = new StringBuilder();
+                                // for( int i = 0; i < Common.getPiece();  i++ )
+                                // {
+                                //     s.append( set.get(i) == true ? "1" : "0" );
+                                //     s.append(" ");
+                                // }
+                                System.out.println("Receive message (bitfield) from peer: " + connectedPeer.PeerId);
                                 //Do some filetransfer stuff here
                                 //Handshake has been successfully created with this peer
                                 //Expect to see the bitfield message here first
@@ -140,7 +133,7 @@ public class peerProcess
                         }
                         else
                         {
-                            sendMessage("Handshake of length 0 received".getBytes(charset));
+                            sendMessage("MEssage of length 0 received".getBytes(charset));
                         }
                         
                        

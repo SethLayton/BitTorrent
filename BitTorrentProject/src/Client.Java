@@ -45,7 +45,7 @@ public class Client
 					if((MESSAGE == null || !MESSAGE.contains(String.valueOf(connectedPeer.PeerId)) && !PeerInfo.isHandShake(connectedPeer.PeerId)))
 					{
 						System.out.println(new String(Common.concat(handshakeheader,handshakezbits,handshakepid), charset));
-						sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid), false);
+						sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
 						byte[] recdata;
 						int length = in.readInt();
 						if(length>0) 
@@ -62,7 +62,7 @@ public class Client
 							System.out.println("Handshake complete with peer: " + connectedPeer.PeerId + ". Connection established");
                             //Send the bitfield message first
                             System.out.println("Attempting to send the bitarray");
-							sendMessage(PeerInfo.MyFileBits.toByteArray(), true);
+                            sendMessage(PeerInfo.MyFileBits.toByteArray());
 						}
                     }
                     else
@@ -106,21 +106,10 @@ public class Client
 		}	
 
 		//send a message to the output stream
-		void sendMessage(byte[] msg, boolean opt)
+		void sendMessage(byte[] msg)
 		{
 			try
 			{
-                // if (opt)
-                // {
-                //     BitSet set = BitSet.valueOf(msg);
-                //     StringBuilder s = new StringBuilder();
-                //     for( int i = 0; i < Common.getPiece();  i++ )
-                //     {
-                //         s.append( set.get( i ) == true ? "1" : "0" );
-                //         s.append(" ");
-                //     }
-                //     System.out.println("Bits: " + s);
-                // }
 				//stream write the message
 				out.writeInt(msg.length);
 				out.write(msg);
