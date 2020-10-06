@@ -33,7 +33,7 @@ public class Common
     public static Long getFileSize() { loadproperties(); return FileSize; }
     public static Long getPieceSize() { loadproperties(); return PieceSize; }
     public static int getPiece() { loadproperties(); return Piece; }
-    public static List<PeerInfo> getPeerInfo() {loadpeerinfo(); return Peers; }
+    public static List<PeerInfo> getPeers() {loadpeerinfo(); return Peers; }
     public static Integer GetSmallestPeerId() {loadpeerinfo(); return Collections.min(PeerIds); }
     public static Integer GetLargestPeerId() {loadpeerinfo(); return Collections.max(PeerIds); }
 

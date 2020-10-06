@@ -15,7 +15,7 @@ public class peerProcess
             if(PeerInfo.MyPeerId != Common.GetSmallestPeerId())
             {
                 //connect to all the previous peers
-                for (PeerInfo p : Common.getPeerInfo()) 
+                for (PeerInfo p : Common.getPeers()) 
                 {   
                     // StringBuilder s = new StringBuilder();
                     // for( int i = 0; i < Common.getPiece();  i++ )
@@ -110,9 +110,13 @@ public class peerProcess
                             System.out.println("Receive message: " + message + " from peer: " + connectedPeer.PeerId);
                             if(message.contains("P2PFILESHARINGPROJ") && !PeerInfo.isHandShake(connectedPeer.PeerId))
                             {
+                                System.out.println("Sending back handshake message to: " + connectedPeer.HostName + " " + connectedPeer.PeerId);
                                 handshakepid = Integer.toString(MyPeer.PeerId).getBytes(charset);
                                 sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
-                                
+                                for (PeerInfo.Pair<Integer, Boolean> b : PeerInfo.hShakeArray) 
+                                {
+                                    System.out.println("PeerId: " + b.getLeft() + " isHandshake: " + b.getRight());
+                                }
                             }
                             else
                             {

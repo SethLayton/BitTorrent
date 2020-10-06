@@ -40,7 +40,7 @@ public class PeerInfo
 
     public static PeerInfo getPeerInfo(String hostname) 
     { 
-        List<PeerInfo> temp = Common.getPeerInfo();
+        List<PeerInfo> temp = Common.getPeers();
         for (PeerInfo pInfo: temp) 
         {
             if(pInfo.HostName.equals(hostname))
@@ -53,13 +53,15 @@ public class PeerInfo
                     MyHostName = pInfo.HostName;
                     MyPortNumber = pInfo.PortNumber;
                     MyHasFile = pInfo.HasFile;
+                    
                     if (MyHasFile)
                     {
                         init.flip(0,Common.getPiece()-1);
                     }
                     MyFileBits = init;
+                    
                 }
-            
+                _init = true;
                 return pInfo;
             }
         }
@@ -69,7 +71,7 @@ public class PeerInfo
     
     public static PeerInfo getPeerInfo(int peerid) 
     { 
-        List<PeerInfo> temp = Common.getPeerInfo();
+        List<PeerInfo> temp = Common.getPeers();
         for (PeerInfo pInfo: temp) 
         {
             if(pInfo.PeerId == peerid)
@@ -87,9 +89,10 @@ public class PeerInfo
                     }
                     MyFileBits = init;
                 }
-            
+                _init = true;
                 return pInfo;
             }
+
         }
         //Log out that we are returning null here
         return null; 
@@ -108,6 +111,11 @@ public class PeerInfo
             if (this.HasFile)
                 init.flip(0,Common.getPiece());
             this.FileBits = init;
+            
+            Pair<Integer,Boolean> pair = new Pair<Integer,Boolean>(this.PeerId,false);
+            hShakeArray.add(pair);
+            
+            
         }
         else
         {
@@ -120,11 +128,13 @@ public class PeerInfo
     {
         Integer peerId = Integer.valueOf(pid);
 
-        for (Pair<Integer,Boolean> p : hShakeArray) 
+        for(int i = 0; i< hShakeArray.size(); i ++)
         {
-            if (p.left == peerId)
+            Integer temp = hShakeArray.get(i).left;
+            if (temp.intValue() == peerId.intValue())
             {
-                p.right = true;
+                Pair<Integer, Boolean> pair = new Pair<Integer, Boolean>(peerId, true);
+                hShakeArray.set(i, pair);
             }
         }
     }
@@ -141,9 +151,9 @@ public class PeerInfo
         return false;
     }
 
-    public class Pair<L,R> 
+    public static class Pair<L,R> 
     {
-        private final L left;
+        private L left;
         private R right;
 
         public Pair(L left, R right) 
@@ -160,6 +170,8 @@ public class PeerInfo
         public R getRight() { return right; }
 
         public void setRight(R set) { this.right = set; }
+
+        public void setLeft(L set) { this.left = set; }
       
         @Override
         public int hashCode() { return left.hashCode() ^ right.hashCode(); }
@@ -168,7 +180,7 @@ public class PeerInfo
         public boolean equals(Object o) 
         {
           if (!(o instanceof Pair)) return false;
-          Pair pairo = (Pair) o;
+          Pair<L,R> pairo = (Pair<L,R>) o;
           return this.left.equals(pairo.getLeft()) &&
                  this.right.equals(pairo.getRight());
         }

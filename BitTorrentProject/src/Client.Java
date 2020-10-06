@@ -2,6 +2,7 @@ import java.net.*;
 import java.io.*;
 import java.nio.charset.*;
 import java.text.MessageFormat;
+import java.util.List;
 
 public class Client 
 {	
@@ -58,8 +59,8 @@ public class Client
 							PeerInfo.SetHandshake(connectedPeer.PeerId);
 							Log.Write(MessageFormat.format(" Peer {0} makes a connection to Peer {1}", PeerInfo.MyPeerId, connectedPeer.PeerId));
 							System.out.println("Handshake complete with peer: " + connectedPeer.PeerId + ". Connection established");
-
-							//Send the bitfield message first
+                            //Send the bitfield message first
+                            System.out.println("Attempting to send the bitarray");
 							sendMessage(PeerInfo.MyFileBits.toByteArray());
 						}
                     }
