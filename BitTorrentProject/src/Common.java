@@ -13,26 +13,19 @@ public class Common
     private static boolean localtest= false;
     private static boolean _cinit = false;
     private static boolean _pinit = false;
-    private static String NumberOfPreferredNeighbors;
-    private static int UnchokingInterval;
-    private static int OptimisticUnchokingInterval;
-    private static String FileName;
-    private static Long FileSize;
-    private static Long PieceSize;
-    private static int Piece;
+    public static String NumberOfPreferredNeighbors;
+    public static int UnchokingInterval;
+    public static int OptimisticUnchokingInterval;
+    public static String FileName;
+    public static Long FileSize;
+    public static Long PieceSize;
+    public static int Piece;
 
     //List of PeerInfo that is initialized from the PeerInfo.cfg on startup and then
     //Updated dynamically while running
-    private static List<PeerInfo> Peers = new ArrayList<PeerInfo>();
-    private static List<Integer> PeerIds = new ArrayList<Integer>();
+    public static List<PeerInfo> Peers = new ArrayList<PeerInfo>();
+    public static List<Integer> PeerIds = new ArrayList<Integer>();
 
-    public static String getNumberOfPreferredNeighbors() { loadproperties(); return NumberOfPreferredNeighbors; }
-    public static int getUnchokingInterval() { loadproperties(); return UnchokingInterval; }
-    public static int getOptimisticUnchokingInterval() { loadproperties(); return OptimisticUnchokingInterval; }
-    public static String getFileName() { loadproperties(); return FileName; }
-    public static Long getFileSize() { loadproperties(); return FileSize; }
-    public static Long getPieceSize() { loadproperties(); return PieceSize; }
-    public static int getPiece() { loadproperties(); return Piece; }
     public static List<PeerInfo> getPeers() {loadpeerinfo(); return Peers; }
     public static Integer GetSmallestPeerId() {loadpeerinfo(); return Collections.min(PeerIds); }
     public static Integer GetLargestPeerId() {loadpeerinfo(); return Collections.max(PeerIds); }

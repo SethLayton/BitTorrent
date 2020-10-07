@@ -99,24 +99,23 @@ public class peerProcess
                             message = new String(data, charset);
                             if(message.contains("P2PFILESHARINGPROJ") && (connectedPeer == null || !PeerInfo.isHandShake(connectedPeer.PeerId)))
                             {
-                            //Potential need to change here as splitting could give null exception
-                            connectedPeer = PeerInfo.getPeerInfo(Integer.parseInt(Common.removeBadFormat(message.split("0000000000")[1])));
-                            //show the message to the user
-                            Log.Write(MessageFormat.format("Peer {0} is connected from Peer {1}", PeerInfo.MyPeerId, connectedPeer.PeerId));
-                            System.out.println("Receive message: " + message + " from peer: " + connectedPeer.PeerId);
-                            
-                            System.out.println("Sending back handshake message to: " + connectedPeer.HostName + " " + connectedPeer.PeerId);
-                            handshakepid = Integer.toString(MyPeer.PeerId).getBytes(charset);
-                            sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
-                            PeerInfo.SetHandshake(connectedPeer.PeerId);
-                            for (PeerInfo.Pair<Integer, Boolean> b : PeerInfo.hShakeArray) 
-                            {
-                                System.out.println("PeerId: " + b.getLeft() + " isHandshake: " + b.getRight());
-                            }
+                                //Potential need to change here as splitting could give null exception
+                                connectedPeer = PeerInfo.getPeerInfo(Integer.parseInt(Common.removeBadFormat(message.split("0000000000")[1])));
+                                //show the message to the user
+                                Log.Write(MessageFormat.format("Peer {0} is connected from Peer {1}", PeerInfo.MyPeerId, connectedPeer.PeerId));
+                                System.out.println("Receive message: " + message + " from peer: " + connectedPeer.PeerId);
+                                
+                                System.out.println("Sending back handshake message to: " + connectedPeer.HostName + " " + connectedPeer.PeerId);
+                                handshakepid = Integer.toString(MyPeer.PeerId).getBytes(charset);
+                                sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
+                                PeerInfo.SetHandshake(connectedPeer.PeerId);
+                                for (PeerInfo.Pair<Integer, Boolean> b : PeerInfo.hShakeArray) 
+                                {
+                                    System.out.println("PeerId: " + b.getLeft() + " isHandshake: " + b.getRight());
+                                }
                             }
                             else
-                            {
-                                
+                            {                                
                                 // StringBuilder s = new StringBuilder();
                                 // for( int i = 0; i < Common.getPiece();  i++ )
                                 // {
@@ -137,9 +136,7 @@ public class peerProcess
                         else
                         {
                             sendMessage("Message of length 0 received".getBytes(charset));
-                        }
-                        
-                       
+                        }   
                     }
                 }
                 catch(Exception e)

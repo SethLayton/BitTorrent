@@ -32,12 +32,6 @@ public class PeerInfo
     public static int Pieces;
     private static boolean _init = false;
 
-    //Getter functions (need to update to use static variables so that we dont need these getters.)
-    public int getPeerId() { return PeerId; }
-    public String getHostName() { return HostName; }
-    public int getPortNumber() { return PortNumber; }
-    public boolean getHasFile() { return HasFile; }
-
     public static PeerInfo getPeerInfo(String hostname) 
     { 
         List<PeerInfo> temp = Common.getPeers();
@@ -48,7 +42,7 @@ public class PeerInfo
                 if (!_init)
                 {
                     
-                    BitSet init = new BitSet(Common.getPiece());
+                    BitSet init = new BitSet(Common.Piece);
                     MyPeerId = pInfo.PeerId;
                     MyHostName = pInfo.HostName;
                     MyPortNumber = pInfo.PortNumber;
@@ -56,7 +50,7 @@ public class PeerInfo
                     
                     if (MyHasFile)
                     {
-                        init.flip(0,Common.getPiece());
+                        init.flip(0,Common.Piece);
                     }
                     MyFileBits = init;
                     
@@ -78,14 +72,14 @@ public class PeerInfo
             {
                 if (!_init)
                 {
-                    BitSet init = new BitSet(Common.getPiece());
+                    BitSet init = new BitSet(Common.Piece);
                     MyPeerId = pInfo.PeerId;
                     MyHostName = pInfo.HostName;
                     MyPortNumber = pInfo.PortNumber;
                     MyHasFile = pInfo.HasFile;
                     if (MyHasFile)
                     {
-                        init.flip(0,Common.getPiece());
+                        init.flip(0,Common.Piece);
                     }
                     MyFileBits = init;
                 }
@@ -107,9 +101,9 @@ public class PeerInfo
             this.PortNumber = Integer.parseInt(data[2]);
             this.HasFile = Boolean.parseBoolean(data[3].equals("1") ? "true" : "false");
 
-            BitSet init = new BitSet(Common.getPiece());
+            BitSet init = new BitSet(Common.Piece);
             if (this.HasFile)
-                init.flip(0,Common.getPiece());
+                init.flip(0,Common.Piece);
             this.FileBits = init;
             
             Pair<Integer,Boolean> pair = new Pair<Integer,Boolean>(this.PeerId,false);
