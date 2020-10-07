@@ -116,7 +116,7 @@ public class peerProcess
                             }
                             else
                             {
-                                //BitSet set = BitSet.valueOf(data);
+                                connectedPeer.FileBits = BitSet.valueOf(data);
                                 // StringBuilder s = new StringBuilder();
                                 // for( int i = 0; i < Common.getPiece();  i++ )
                                 // {
@@ -128,7 +128,6 @@ public class peerProcess
                                 //Handshake has been successfully created with this peer
                                 //Expect to see the bitfield message here first
                                 //Then we send a bitfield back to the other peer
-                                //sendMessage(message.toUpperCase().getBytes(charset));
                             }                            
                         }
                         else
