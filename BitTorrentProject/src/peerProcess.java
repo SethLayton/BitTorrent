@@ -116,23 +116,27 @@ public class peerProcess
                             }
                             else
                             {
-                                connectedPeer.FileBits = BitSet.valueOf(data);
+                                
                                 // StringBuilder s = new StringBuilder();
                                 // for( int i = 0; i < Common.getPiece();  i++ )
                                 // {
                                 //     s.append( set.get(i) == true ? "1" : "0" );
                                 //     s.append(" ");
                                 // }
-                                System.out.println("Receive message (bitfield) from peer: " + connectedPeer.PeerId);
+                                
                                 //Do some filetransfer stuff here
                                 //Handshake has been successfully created with this peer
                                 //Expect to see the bitfield message here first
+                                connectedPeer.FileBits = BitSet.valueOf(data);
+                                System.out.println("Receive message (bitfield) from peer: " + connectedPeer.PeerId);
+
                                 //Then we send a bitfield back to the other peer
+                                sendMessage(PeerInfo.MyFileBits.toByteArray());
                             }                            
                         }
                         else
                         {
-                            sendMessage("MEssage of length 0 received".getBytes(charset));
+                            sendMessage("Message of length 0 received".getBytes(charset));
                         }
                         
                        
