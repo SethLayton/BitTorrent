@@ -30,7 +30,7 @@ public class Client
 			try
 			{	
 				handshakepid = Integer.toString(PeerInfo.MyPeerId).getBytes(charset);
-				System.out.println("Connecting to " + connectedPeer.HostName + ":" + connectedPeer.PortNumber);
+				//System.out.println("Connecting to " + connectedPeer.HostName + ":" + connectedPeer.PortNumber);
 				//create a socket to connect to the server
 				requestSocket = new Socket(connectedPeer.HostName, connectedPeer.PortNumber);
 				System.out.println(MessageFormat.format("Connected to {0} on port: {1}", connectedPeer.HostName, connectedPeer.PortNumber));
@@ -39,12 +39,11 @@ public class Client
 				out.flush();
 				in = new DataInputStream(requestSocket.getInputStream());
 
-				System.out.println("MESSAGE= " + MESSAGE);
 				while(true)
 				{
 					if((MESSAGE == null || !MESSAGE.contains(String.valueOf(connectedPeer.PeerId)) && !PeerInfo.isHandShake(connectedPeer.PeerId)))
 					{
-						System.out.println(new String(Common.concat(handshakeheader,handshakezbits,handshakepid), charset));
+						//System.out.println(new String(Common.concat(handshakeheader,handshakezbits,handshakepid), charset));
 						sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
 						byte[] recdata;
 						int length = in.readInt();
@@ -57,7 +56,7 @@ public class Client
 						//System.out.println("Receive message: " + MESSAGE);
 						if (MESSAGE.contains(String.valueOf(connectedPeer.PeerId)))
 						{
-							PeerInfo.SetHandshake(connectedPeer.PeerId);
+							PeerInfo.SetHandshake(connectedPeer.PeerId, true);
 							Log.Write(MessageFormat.format(" Peer {0} makes a connection to Peer {1}", PeerInfo.MyPeerId, connectedPeer.PeerId));
 							System.out.println("Handshake complete with peer: " + connectedPeer.PeerId + ". Connection established");
                             //Send the bitfield message first
@@ -70,16 +69,12 @@ public class Client
                             //Do some file transfer stuff here
                     }				
 				}	
-            }
-            catch (SocketException exception) 
-            {
-                // Output expected SocketExceptions.
-                System.err.println(exception);
-            }
-			// catch (ConnectException e) 
-			// {
-			// 	System.err.println("Connection refused. You need to initiate a server first.");
-			// } 
+			}
+			catch (IOException e) 
+			{
+				System.err.println("Connection closed with: " + connectedPeer.HostName);
+				PeerInfo.SetHandshake(connectedPeer.PeerId, false);
+			}
 			catch (Exception e ) 
 			{
                     System.err.println("Error: " + e.getMessage() + "\n");

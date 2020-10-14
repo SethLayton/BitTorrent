@@ -103,15 +103,16 @@ public class peerProcess
                                 connectedPeer = PeerInfo.getPeerInfo(Integer.parseInt(Common.removeBadFormat(message.split("0000000000")[1])));
                                 //show the message to the user
                                 Log.Write(MessageFormat.format("Peer {0} is connected from Peer {1}", PeerInfo.MyPeerId, connectedPeer.PeerId));
-                                System.out.println("Receive message: " + message + " from peer: " + connectedPeer.PeerId);
+                                //System.out.println("Receive message: " + message + " from peer: " + connectedPeer.PeerId);
                                 
-                                System.out.println("Sending back handshake message to: " + connectedPeer.HostName + " " + connectedPeer.PeerId);
+                                //System.out.println("Sending back handshake message to: " + connectedPeer.HostName + " " + connectedPeer.PeerId);
                                 handshakepid = Integer.toString(MyPeer.PeerId).getBytes(charset);
                                 sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
-                                PeerInfo.SetHandshake(connectedPeer.PeerId);
+                                PeerInfo.SetHandshake(connectedPeer.PeerId, true);
                                 for (PeerInfo.Pair<Integer, Boolean> b : PeerInfo.hShakeArray) 
                                 {
-                                    System.out.println("PeerId: " + b.getLeft() + " isHandshake: " + b.getRight());
+                                    if (b.getLeft() != MyPeer.PeerId)
+                                        System.out.println("PeerId: " + b.getLeft() + " isHandshake: " + b.getRight());
                                 }
                             }
                             else
@@ -138,6 +139,11 @@ public class peerProcess
                             sendMessage("Message of length 0 received".getBytes(charset));
                         }   
                     }
+                }
+                catch (IOException e) 
+                {
+                    System.err.println("Connection closed with: " + connectedPeer.HostName);
+                    PeerInfo.SetHandshake(connectedPeer.PeerId, false);
                 }
                 catch(Exception e)
                 {

@@ -37,7 +37,13 @@ public class PeerInfo
         List<PeerInfo> temp = Common.getPeers();
         for (PeerInfo pInfo: temp) 
         {
-            if(pInfo.HostName.equals(hostname))
+            String hname;
+            if (pInfo.HostName.contains(".cise.ufl.edu"))
+                hname = pInfo.HostName.split(".cise.ufl.edu")[0];
+            else
+                hname = pInfo.HostName;
+
+            if(hname.equals(hostname))
             {
                 if (!_init)
                 {
@@ -118,7 +124,7 @@ public class PeerInfo
 
     }
 
-    public static void SetHandshake(int pid)
+    public static void SetHandshake(int pid, boolean value)
     {
         Integer peerId = Integer.valueOf(pid);
 
@@ -127,7 +133,7 @@ public class PeerInfo
             Integer temp = hShakeArray.get(i).left;
             if (temp.intValue() == peerId.intValue())
             {
-                Pair<Integer, Boolean> pair = new Pair<Integer, Boolean>(peerId, true);
+                Pair<Integer, Boolean> pair = new Pair<Integer, Boolean>(peerId, value);
                 hShakeArray.set(i, pair);
             }
         }
