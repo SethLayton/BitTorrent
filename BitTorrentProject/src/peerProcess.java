@@ -144,6 +144,11 @@ public class peerProcess
                 {
                     System.err.println("Connection closed with: " + connectedPeer.HostName);
                     PeerInfo.SetHandshake(connectedPeer.PeerId, false);
+                    for (PeerInfo.Pair<Integer, Boolean> b : PeerInfo.hShakeArray) 
+                    {
+                        if (b.getLeft() != MyPeer.PeerId)
+                            System.out.println("PeerId: " + b.getLeft() + " isHandshake: " + b.getRight());
+                    }
                 }
                 catch(Exception e)
                 {

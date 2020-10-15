@@ -1,7 +1,8 @@
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.Object;
 
 public class PeerInfo
@@ -19,7 +20,6 @@ public class PeerInfo
     public BitSet fileBits;
     public static List<Pair<Integer,Boolean>> hShakeArray = new ArrayList<Pair<Integer,Boolean>>();
      
-
     //Locally running processes information. This is set from the singleton on startup
     //MyFileBits is set dynamically as the process runs
     public static int MyPeerId;
@@ -31,6 +31,142 @@ public class PeerInfo
     //Singleton variables
     public static int Pieces;
     private static boolean _init = false;
+
+    public static class downloadRate
+    {
+        //This is a 'globally' accessed list. Needs to be thread safe
+        public List<Pair<Integer, Float>> dRateList = new ArrayList<Pair<Integer, Float>>();
+
+        public downloadRate ()
+        {
+            try
+            {
+                List<PeerInfo> pInf = Common.getPeers();
+                for (PeerInfo p : pInf) 
+                {
+                    if (p.PeerId != MyPeerId)
+                        dRateList.add(new Pair<Integer,Float>(p.PeerId, (float) 0));
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Write("Exception in downloadRate default constructor: " + e.getMessage());
+                System.out.println("Exception in downloadRate default constructor: " + e.getMessage());
+                System.err.println("Error: " + e.getMessage() + "\n");
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                String sStackTrace = sw.toString(); // stack trace as a string
+                System.out.println(sStackTrace);
+            }
+
+        }
+
+        //Returns the highest download rate currently stored in the list
+        //Don't know if this is actually useful
+        public Float getHighestDownload()
+        {
+            //default instantiate this return value
+            Float highDownload = dRateList.get(0).getRight();
+            try
+            {
+                for (Pair<Integer, Float> p : dRateList) 
+                {
+                    if (p.getRight() > highDownload)
+                        highDownload = p.getRight();
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Write("Exception in getHighestDownload: " + e.getMessage());
+                System.out.println("Exception in getHighestDownload: " + e.getMessage());
+                System.err.println("Error: " + e.getMessage() + "\n");
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                String sStackTrace = sw.toString(); // stack trace as a string
+                System.out.println(sStackTrace);
+            }
+
+            return highDownload;            
+        }
+
+        //returns the PeerId of the top (number of preferred peers) highest downloadrates
+        //Since the set function resets all the not currently uploading values to 0
+        //This function needs only look at elements in the list that have a download rate > 0
+        public Integer[] getHighestDownloadRates()
+        {
+            //default instantiate this return value
+            Integer[] highDownloads = new Integer[Common.NumberOfPreferredNeighbors + 1];
+            int count = 0;
+            try
+            {
+                for (Pair<Integer, Float> p : dRateList) 
+                {
+                    if (p.getRight() > 0)
+                    {
+                        highDownloads[count] = p.getLeft();
+                        count++;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Write("Exception in getHighestDownloadRates: " + e.getMessage());
+                System.out.println("Exception in getHighestDownloadRates: " + e.getMessage());
+                System.err.println("Error: " + e.getMessage() + "\n");
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                String sStackTrace = sw.toString(); // stack trace as a string
+                System.out.println(sStackTrace);
+            }
+
+            return highDownloads;            
+        }
+
+        //This needs to be updated to be thread safe
+        //Pass in the currently sending (uploading to this client) peers and their downloadspeeds
+        //reset the rest of the list back to a 0 download rate
+        public void setDownloadRate (List<Pair<Integer, Float>> rates)
+        {
+            try
+            {
+                for (Pair<Integer,Float> p : rates) 
+                {                                    
+                    if (Common.PeerIds.contains(p.getLeft()))
+                    {
+                        for(int i = 0; i< dRateList.size(); i ++)
+                        {
+                            Integer temp = dRateList.get(i).left;
+                            if (temp.intValue() == p.getLeft().intValue())
+                            {
+                                dRateList.set(i, p);
+                            }
+                            else
+                                dRateList.set(i, new Pair<Integer,Float>(dRateList.get(i).getLeft(), (float) 0));
+                        }
+                    }
+                    else
+                    {
+                        Log.Write("Exception in setDownloadRate: peerId passed in (" + p.getLeft() + ") does not belong to the group of peers.");
+                        System.out.println("Exception in setDownloadRate: peerId passed in (" + p.getLeft() + ") does not belong to the group of peers.");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Write("Exception in setDownloadRate: " + e.getMessage());
+                System.out.println("Exception in setDownloadRate: " + e.getMessage());
+                System.err.println("Error: " + e.getMessage() + "\n");
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                String sStackTrace = sw.toString(); // stack trace as a string
+                System.out.println(sStackTrace);
+            }
+        }
+    }
 
     public static PeerInfo getPeerInfo(String hostname) 
     { 

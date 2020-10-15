@@ -13,7 +13,7 @@ public class Common
     private static boolean localtest= false;
     private static boolean _cinit = false;
     private static boolean _pinit = false;
-    public static String NumberOfPreferredNeighbors;
+    public static int NumberOfPreferredNeighbors;
     public static int UnchokingInterval;
     public static int OptimisticUnchokingInterval;
     public static String FileName;
@@ -40,7 +40,7 @@ public class Common
                 
                 localtest = java.net.InetAddress.getLocalHost().toString().split("/")[0].equals("DESKTOP-5N80JFQ");
                 comProperties.load(new FileInputStream(localtest ? "BitTorrentProject/Common.cfg" : "../Common.cfg"));                    
-                NumberOfPreferredNeighbors = comProperties.get("NumberOfPreferredNeighbors").toString();
+                NumberOfPreferredNeighbors = Integer.parseInt(comProperties.get("NumberOfPreferredNeighbors").toString());
                 UnchokingInterval = Integer.parseInt(comProperties.get("UnchokingInterval").toString());
                 OptimisticUnchokingInterval = Integer.parseInt(comProperties.get("OptimisticUnchokingInterval").toString());
                 FileName = comProperties.get("FileName").toString();
