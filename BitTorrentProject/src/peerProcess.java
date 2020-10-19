@@ -117,26 +117,35 @@ public class peerProcess
                             }
                             else
                             {                                
-                                // StringBuilder s = new StringBuilder();
-                                // for( int i = 0; i < Common.getPiece();  i++ )
-                                // {
-                                //     s.append( set.get(i) == true ? "1" : "0" );
-                                //     s.append(" ");
-                                // }
+                                
                                 
                                 //Do some filetransfer stuff here
                                 //Handshake has been successfully created with this peer
                                 //Expect to see the bitfield message here first
                                 connectedPeer.FileBits = BitSet.valueOf(data);
                                 System.out.println("Receive message (bitfield) from peer: " + connectedPeer.PeerId);
-
+                                StringBuilder s = new StringBuilder();
+                                for( int i = 0; i < Common.Piece;  i++ )
+                                {
+                                    s.append( connectedPeer.FileBits.get(i) == true ? "1" : "0" );
+                                    s.append(" ");
+                                }
+                                System.out.println(s);
+                                StringBuilder ss = new StringBuilder();
+                                for( int i = 0; i < Common.Piece;  i++ )
+                                {
+                                    ss.append( PeerInfo.MyFileBits.get(i) == true ? "1" : "0" );
+                                    ss.append(" ");
+                                }
+                                System.out.println("MyFileBits " + ss);
                                 //Then we send a bitfield back to the other peer
                                 sendMessage(PeerInfo.MyFileBits.toByteArray());
+                                
                             }                            
                         }
                         else
                         {
-                            sendMessage("Message of length 0 received".getBytes(charset));
+                            System.out.println("Message of length 0 received");
                         }   
                     }
                 }
@@ -187,7 +196,7 @@ public class peerProcess
                 out.writeInt(msg.length);
                 out.write(msg);
                 out.flush();
-                System.out.println("Send message: " + new String(msg, charset));
+               // System.out.println("Send message: " + new String(msg, charset));
             }
             catch(IOException ioException)
             {

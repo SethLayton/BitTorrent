@@ -33,7 +33,7 @@ public class Client
 				//System.out.println("Connecting to " + connectedPeer.HostName + ":" + connectedPeer.PortNumber);
 				//create a socket to connect to the server
 				requestSocket = new Socket(connectedPeer.HostName, connectedPeer.PortNumber);
-				System.out.println(MessageFormat.format("Connected to {0} on port: {1}", connectedPeer.HostName, connectedPeer.PortNumber));
+				System.out.println(MessageFormat.format("Connected to {0} on port: {1,number,#}", connectedPeer.HostName, connectedPeer.PortNumber));
 				//initialize inputStream and outputStream
 				out = new DataOutputStream(requestSocket.getOutputStream());
 				out.flush();
@@ -57,16 +57,41 @@ public class Client
 						if (MESSAGE.contains(String.valueOf(connectedPeer.PeerId)))
 						{
 							PeerInfo.SetHandshake(connectedPeer.PeerId, true);
-							Log.Write(MessageFormat.format(" Peer {0} makes a connection to Peer {1}", PeerInfo.MyPeerId, connectedPeer.PeerId));
+							Log.Write(MessageFormat.format(" Peer {0} makes a connection to Peer {1,number,#}", PeerInfo.MyPeerId, connectedPeer.PeerId));
 							System.out.println("Handshake complete with peer: " + connectedPeer.PeerId + ". Connection established");
                             //Send the bitfield message first
-                            System.out.println("Attempting to send the bitarray");
+							System.out.println("Attempting to send the bitarray");
+							StringBuilder s = new StringBuilder();
+							for( int i = 0; i < Common.Piece;  i++ )
+							{
+								s.append( PeerInfo.MyFileBits.get(i) == true ? "1" : "0" );
+								s.append(" ");
+							}
+							System.out.println(s);
                             sendMessage(PeerInfo.MyFileBits.toByteArray());
 						}
                     }
                     else
                     {
+                        byte[] recdata;
+						int length = in.readInt();
+						if(length>0) 
+						{
+							recdata = new byte[length];
+							in.readFully(recdata, 0, recdata.length);
+						
                             //Do some file transfer stuff here
+                            //we expect a bitfield back from the connected peer first
+                            connectedPeer.FileBits = BitSet.valueOf(recdata);
+                            System.out.println("Receive message (bitfield) from peer: " + connectedPeer.PeerId);
+                            StringBuilder s = new StringBuilder();
+                            for( int i = 0; i < Common.Piece;  i++ )
+                            {
+                                s.append( connectedPeer.FileBits.get(i) == true ? "1" : "0" );
+                                s.append(" ");
+                            }
+                            System.out.println(s);
+                        }
                     }				
 				}	
 			}
