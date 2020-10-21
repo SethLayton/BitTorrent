@@ -56,7 +56,8 @@ pulic class ChokingInterval {
 	{
 		public void run()
 		{
-			calculateUnchoked();
+			calculateUnchoked(); //getHighestDownloadRates();
+			
 			
 
 		}
