@@ -168,6 +168,98 @@ public class PeerInfo
         }
     }
 
+    public static UnchokedNeighbors
+    {
+        //True  = unchoked
+        //False = choked
+        public List<Pair<Integer, Boolean>> unchokedNeighbors = new ArrayList<Pair<Integer, Boolean>>(); 
+
+        public UnchokedNeighbors ()
+        {
+            try
+            {
+                List<PeerInfo> pInf = Common.getPeers();
+                for (PeerInfo p : pInf) 
+                {
+                    if (p.PeerId != MyPeerId)
+                        unchokedNeighbors.add(new Pair<Integer,Boolean>(p.PeerId, false));
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Write("Exception in UnchokedNeighbors default constructor: " + e.getMessage());
+                System.out.println("Exception in UnchokedNeighbors default constructor: " + e.getMessage());
+                System.err.println("Error: " + e.getMessage() + "\n");
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                String sStackTrace = sw.toString(); // stack trace as a string
+                System.out.println(sStackTrace);
+            }
+
+        }
+
+        public void setUnchokedNeighbors(Integer[] pIds)
+        {
+            
+            for (int i = 0; i < unchokedNeighbors.size() ; i++) 
+            {
+                Pair<Integer, Boolean> p = unchokedNeighbors.get(i);
+                boolean modified = false;
+                for(id: pIds)
+                {
+                    if(p.getLeft() == id)
+                    {
+                        unchokedNeighbors.get(i).setRight(true);
+                        modified = true;
+                    } 
+                }
+                if (!modified)
+                {
+                    unchokedNeighbors.get(i).setRight(false);
+                }
+
+            }
+
+            return ;
+        }
+
+        public void setOptUnchoked(Integer pId)
+        {
+            
+            for (int i = 0; i < unchokedNeighbors.size() ; i++) 
+            {
+                Pair<Integer, Boolean> p = unchokedNeighbors.get(i);
+                
+                if(p.getLeft() == pId)
+                {
+                    unchokedNeighbors.get(i).setRight(true);
+                } 
+                
+
+            }
+
+            return ;
+        }
+
+        public Integer getOptUnchoked()
+        {
+            Random r = new Random();
+            boolean found = false;
+            do{
+                int a = r.nextInt(unchokedNeighbors.size());
+                if (!unchokedNeighbors.get(a).getRight()) {
+                    found = true;
+                }
+            } while(!found)
+
+            return unchokedNeighbors.get(a).getLeft();
+
+        }
+
+
+    }
+
     public static PeerInfo getPeerInfo(String hostname) 
     { 
         List<PeerInfo> temp = Common.getPeers();
