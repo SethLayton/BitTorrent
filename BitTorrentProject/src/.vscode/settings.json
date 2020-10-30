@@ -1,0 +1,6 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "/Users/tyler/Downloads/jsch-0.1.55.jar"
+    ]
+}
