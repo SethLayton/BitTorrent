@@ -50,6 +50,7 @@ public class peerProcess
                     listener.close();
             } 
         }
+        ChokingInterval choke = new ChokingInterval(Common.NumberOfPreferredNeighbors, Common.Peers.size(), Common.UnchokingInterval, Common.OptimisticUnchokingInterval);
  
     }
     
