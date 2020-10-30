@@ -1,3 +1,5 @@
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -15,7 +17,7 @@ public class ChokingInterval {
 	public ChokingInterval(int numPreferredPeers,int numPeers, int chokingInterval, int optUnchokedInterval)
 	{
 		this.numPeers = numPeers;
-		this.numPrefferedPeers = numPrefferedPeers;
+		this.numPreferredPeers = numPreferredPeers;
 		this.chokedPeers = new boolean[numPeers];
 		this.chokingInterval = chokingInterval;
 		this.optUnchokedInterval = optUnchokedInterval;
@@ -61,7 +63,7 @@ public class ChokingInterval {
 			}
 			finally
 			{
-				sem.realease();
+				sem.release();
 			}
 			
 		}
@@ -78,7 +80,7 @@ public class ChokingInterval {
 		public void run()
 		{
 
-			Integer[] highestRates = PeerInfo.downloadRate.getHighestDownloadRates();
+			Integer[] highestRates = PeerInfo.DownloadRate.getHighestDownloadRates();
 			try 
 			{
 				sem.acquire();
@@ -99,7 +101,7 @@ public class ChokingInterval {
 			}
 			finally
 			{
-				sem.realease();
+				sem.release();
 			}
 
 

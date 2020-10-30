@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Random;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Object;
@@ -15,7 +16,7 @@ public class PeerInfo
     public BitSet FileBits;
     public boolean choked;
     public boolean optUnchoked;
-    public long downloadRate;
+    public static long downloadRate;
     public boolean interested;
     public BitSet fileBits;
     public static List<Pair<Integer,Boolean>> hShakeArray = new ArrayList<Pair<Integer,Boolean>>();
@@ -32,12 +33,12 @@ public class PeerInfo
     public static int Pieces;
     private static boolean _init = false;
 
-    public static class downloadRate
+    public static class DownloadRate
     {
         //This is a 'globally' accessed list. Needs to be thread safe
-        public List<Pair<Integer, Float>> dRateList = new ArrayList<Pair<Integer, Float>>();
+        public static List<Pair<Integer, Float>> dRateList = new ArrayList<Pair<Integer, Float>>();
 
-        public downloadRate ()
+        public DownloadRate ()
         {
             try
             {
@@ -64,7 +65,7 @@ public class PeerInfo
 
         //Returns the highest download rate currently stored in the list
         //Don't know if this is actually useful
-        public Float getHighestDownload()
+        public static Float getHighestDownload()
         {
             //default instantiate this return value
             Float highDownload = dRateList.get(0).getRight();
@@ -94,7 +95,7 @@ public class PeerInfo
         //returns the PeerId of the top (number of preferred peers) highest downloadrates
         //Since the set function resets all the not currently uploading values to 0
         //This function needs only look at elements in the list that have a download rate > 0
-        public Integer[] getHighestDownloadRates()
+        public static Integer[] getHighestDownloadRates()
         {
             //default instantiate this return value
             Integer[] highDownloads = new Integer[Common.NumberOfPreferredNeighbors + 1];
@@ -128,7 +129,7 @@ public class PeerInfo
         //This needs to be updated to be thread safe
         //Pass in the currently sending (uploading to this client) peers and their downloadspeeds
         //reset the rest of the list back to a 0 download rate
-        public void setDownloadRate (List<Pair<Integer, Float>> rates)
+        public static void setDownloadRate (List<Pair<Integer, Float>> rates)
         {
             try
             {
@@ -168,11 +169,11 @@ public class PeerInfo
         }
     }
 
-    public static UnchokedNeighbors
+    public static class UnchokedNeighbors
     {
         //True  = unchoked
         //False = choked
-        public List<Pair<Integer, Boolean>> unchokedNeighbors = new ArrayList<Pair<Integer, Boolean>>(); 
+        public static List<Pair<Integer, Boolean>> unchokedNeighbors = new ArrayList<Pair<Integer, Boolean>>(); 
 
         public UnchokedNeighbors ()
         {
@@ -199,14 +200,14 @@ public class PeerInfo
 
         }
 
-        public void setUnchokedNeighbors(Integer[] pIds)
+        public static void setUnchokedNeighbors(Integer[] pIds)
         {
             
             for (int i = 0; i < unchokedNeighbors.size() ; i++) 
             {
                 Pair<Integer, Boolean> p = unchokedNeighbors.get(i);
                 boolean modified = false;
-                for(id: pIds)
+                for(Integer id: pIds)
                 {
                     if(p.getLeft() == id)
                     {
@@ -224,7 +225,7 @@ public class PeerInfo
             return ;
         }
 
-        public void setOptUnchoked(Integer pId)
+        public static void setOptUnchoked(Integer pId)
         {
             
             for (int i = 0; i < unchokedNeighbors.size() ; i++) 
@@ -242,16 +243,19 @@ public class PeerInfo
             return ;
         }
 
-        public Integer getOptUnchoked()
+        public static Integer getOptUnchoked()
         {
             Random r = new Random();
             boolean found = false;
-            do{
-                int a = r.nextInt(unchokedNeighbors.size());
-                if (!unchokedNeighbors.get(a).getRight()) {
+            int a;
+            do
+            {
+                 a = r.nextInt(unchokedNeighbors.size());
+                if (!unchokedNeighbors.get(a).getRight()) 
+                {
                     found = true;
                 }
-            } while(!found)
+            } while(!found);
 
             return unchokedNeighbors.get(a).getLeft();
 
