@@ -3,7 +3,6 @@ import java.io.*;
 import java.nio.charset.*;
 import java.text.MessageFormat;
 import java.util.BitSet;
-
 public class peerProcess 
 {
     public static void main(String[] args) throws Exception 
@@ -51,6 +50,7 @@ public class peerProcess
                     listener.close();
             } 
         }
+        ChokingInterval choke = new ChokingInterval(Common.NumberOfPreferredNeighbors, Common.Peers.size(), Common.UnchokingInterval, Common.OptimisticUnchokingInterval);
  
     }
     
