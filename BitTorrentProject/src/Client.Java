@@ -2,7 +2,6 @@ import java.net.*;
 import java.io.*;
 import java.nio.charset.*;
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.BitSet;
 
 public class Client 
