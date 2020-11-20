@@ -3,6 +3,8 @@ import java.io.*;
 import java.nio.charset.*;
 import java.text.MessageFormat;
 import java.util.BitSet;
+import java.util.ArrayList;
+
 public class peerProcess 
 {
     public static void main(String[] args) throws Exception 
@@ -19,7 +21,7 @@ public class peerProcess
                     if (p.PeerId < PeerInfo.MyPeerId) 
                     {   
                         System.out.println("Attempting to connect to client: " + p.PeerId + " " + p.HostName);   
-                        new Client.Handler(p).start();
+                        new Handler(p).start();
                     }
                 }                
             }
@@ -42,8 +44,7 @@ public class peerProcess
                 while(true) 
                 {
                     new Handler(listener.accept(), MyPeer).start();
-                }
-                
+                }                
             }  
             finally 
             {
@@ -65,8 +66,8 @@ public class peerProcess
         private DataInputStream in;	//stream read from the socket
         private DataOutputStream out;    //stream write to the socket
         Charset charset = StandardCharsets.UTF_16;
-        byte handshakeheader[] = "P2PFILESHARINGPROJ".getBytes(charset);
-        byte handshakezbits[] = "0000000000".getBytes(charset);
+        //byte handshakeheader[] = "P2PFILESHARINGPROJ".getBytes(charset);
+        //byte handshakezbits[] = "0000000000".getBytes(charset);
         byte handshakepid[];
         private PeerInfo MyPeer;
         private PeerInfo connectedPeer;
@@ -74,6 +75,11 @@ public class peerProcess
         public Handler(Socket connection, PeerInfo p) 
         {
             this.connection = connection;
+            this.MyPeer = p;
+        }
+
+        public Handler( PeerInfo p) 
+        {
             this.MyPeer = p;
         }
 
@@ -93,7 +99,7 @@ public class peerProcess
                         int length = in.readInt();
                         byte[] data;
                         if(length>0) 
-                        {
+                        {                        
                             data = new byte[length];
                             in.readFully(data, 0, data.length);
                             message = new String(data, charset);
@@ -107,7 +113,7 @@ public class peerProcess
                                 
                                 //System.out.println("Sending back handshake message to: " + connectedPeer.HostName + " " + connectedPeer.PeerId);
                                 handshakepid = Integer.toString(MyPeer.PeerId).getBytes(charset);
-                                sendMessage(Common.concat(handshakeheader,handshakezbits,handshakepid));
+                                sendMessage(Common.concat(Message.handshakeheader,Message.handshakezbits,handshakepid));
                                 PeerInfo.SetHandshake(connectedPeer.PeerId, true);
                                 for (PeerInfo.Pair<Integer, Boolean> b : PeerInfo.hShakeArray) 
                                 {
@@ -116,30 +122,54 @@ public class peerProcess
                                 }
                             }
                             else
-                            {                                
+                            {  
                                 
-                                
-                                //Do some filetransfer stuff here
-                                //Handshake has been successfully created with this peer
-                                //Expect to see the bitfield message here first
-                                connectedPeer.FileBits = BitSet.valueOf(data);
-                                System.out.println("Receive message (bitfield) from peer: " + connectedPeer.PeerId);
-                                StringBuilder s = new StringBuilder();
-                                for( int i = 0; i < Common.Piece;  i++ )
+                                data = new byte[length];
+                                in.readFully(data, 0, data.length);
+                                ArrayList<byte[]> fields = Message.parseMessage(data);
+
+                                switch (Integer.parseInt(fields.get(1).toString()))
                                 {
-                                    s.append( connectedPeer.FileBits.get(i) == true ? "1" : "0" );
-                                    s.append(" ");
+                                    case 0: //choke
+                                        break;
+                                    case 1: //unchoke
+                                        break;
+                                    case 2: //interested
+                                        break;
+                                    case 3: //not interested
+                                        break;
+                                    case 4: //have
+                                        break;
+                                    case 5: //bitfield
+                                        
+                                        break;
+                                    case 6: //request
+                                        break;
+                                    case 7: //piece
+                                        break;
                                 }
-                                System.out.println(s);
-                                StringBuilder ss = new StringBuilder();
-                                for( int i = 0; i < Common.Piece;  i++ )
-                                {
-                                    ss.append( PeerInfo.MyFileBits.get(i) == true ? "1" : "0" );
-                                    ss.append(" ");
-                                }
-                                System.out.println("MyFileBits " + ss);
-                                //Then we send a bitfield back to the other peer
-                                sendMessage(PeerInfo.MyFileBits.toByteArray());
+
+                                // //Do some filetransfer stuff here
+                                // //Handshake has been successfully created with this peer
+                                // //Expect to see the bitfield message here first
+                                // connectedPeer.FileBits = BitSet.valueOf(data);
+                                // System.out.println("Receive message (bitfield) from peer: " + connectedPeer.PeerId);
+                                // StringBuilder s = new StringBuilder();
+                                // for( int i = 0; i < Common.Piece;  i++ )
+                                // {
+                                //     s.append( connectedPeer.FileBits.get(i) == true ? "1" : "0" );
+                                //     s.append(" ");
+                                // }
+                                // System.out.println(s);
+                                // StringBuilder ss = new StringBuilder();
+                                // for( int i = 0; i < Common.Piece;  i++ )
+                                // {
+                                //     ss.append( PeerInfo.MyFileBits.get(i) == true ? "1" : "0" );
+                                //     ss.append(" ");
+                                // }
+                                // System.out.println("MyFileBits " + ss);
+                                // //Then we send a bitfield back to the other peer
+                                // sendMessage(PeerInfo.MyFileBits.toByteArray());
                                 
                             }                            
                         }

@@ -1,4 +1,9 @@
 import java.nio.charset.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+
+
 import java.nio.ByteBuffer;
 
 public class Message {
@@ -6,15 +11,25 @@ public class Message {
     Charset charset = StandardCharsets.UTF_16;
     byte[] msgLength = new byte[4];
     byte[] msgType = new byte[1];
-    
+    public static byte handshakeheader[] = "P2PFILESHARINGPROJ".getBytes();
+    public static byte handshakezbits[] = "0000000000".getBytes();
+    ArrayList<byte[]> fields = new ArrayList<byte[]>();
     public Message() {}
+
+    public static ArrayList<byte[]> parseMessage (byte[] bArray)
+    {
+        ArrayList<byte[]> ListReturn = new ArrayList<byte[]>();
+        ListReturn.add(Arrays.copyOfRange(bArray, 0, 3));
+        ListReturn.add(Arrays.copyOfRange(bArray, 4, 4));
+        int temp = 5 + Integer.parseInt(ListReturn.get(0).toString());
+        ListReturn.add(Arrays.copyOfRange(bArray, 5, temp));
+        return ListReturn;
+    }
 
     // Create header message from peer ID
     byte[] createHandshake(int ID) {
 
-        // Create byte arrays for header, padding bits, and peer ID
-        byte handshakeheader[] = "P2PFILESHARINGPROJ".getBytes();
-        byte handshakezbits[] = "0000000000".getBytes();
+        // Create byte arrays for header, padding bits, and peer ID     
         byte handshakepid[] = String.format("%04d", ID).getBytes();
 
         // Return final byte array
@@ -77,14 +92,14 @@ public class Message {
     }
 
     // Create 'bitfield' message
-    byte[] createBitfield(byte[] bitfield) {
+    byte[] createBitfield(BitSet bitfield) {
 
         // Message length will depend on bitfield length and the type will be 5
-        msgLength = ByteBuffer.allocate(4).putInt(1 + bitfield.length).array();
+        msgLength = ByteBuffer.allocate(4).putInt(1 + bitfield.toByteArray().length).array();
         msgType[0] = 5;
 
         // Return final byte array
-        return Common.concat(msgLength, msgType, bitfield);
+        return Common.concat(msgLength, msgType, bitfield.toByteArray());
     }
 
     // Create 'request' message
