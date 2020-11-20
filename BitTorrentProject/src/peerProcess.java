@@ -61,6 +61,7 @@ public class peerProcess
     */
     private static class Handler extends Thread 
     {
+        //Socket requestSocket; 
         private String message;    //message received from the client
         private Socket connection;
         private DataInputStream in;	//stream read from the socket
@@ -80,7 +81,25 @@ public class peerProcess
 
         public Handler( PeerInfo p) 
         {
-            this.MyPeer = p;
+            try
+			{
+                this.connectedPeer = p;
+                connection = new Socket(connectedPeer.HostName, connectedPeer.PortNumber);
+            }
+            catch (IOException e) 
+			{
+				System.err.println("Connection closed with: " + connectedPeer.HostName);
+				PeerInfo.SetHandshake(connectedPeer.PeerId, false);
+			}
+			catch (Exception e ) 
+			{
+                    System.err.println("Error: " + e.getMessage() + "\n");
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    e.printStackTrace(pw);
+                    String sStackTrace = sw.toString(); // stack trace as a string
+                    System.out.println(sStackTrace);
+			} 
         }
 
         public void run() 

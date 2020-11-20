@@ -38,7 +38,7 @@ public class Common
             if (!_cinit)
             {
                 
-                localtest = java.net.InetAddress.getLocalHost().toString().split("/")[0].equals("DESKTOP-5N80JFQ");
+                localtest = !java.net.InetAddress.getLocalHost().toString().split("/")[0].contains("cise.ufl.edu");
                 comProperties.load(new FileInputStream(localtest ? "BitTorrentProject/Common.cfg" : "../Common.cfg"));                    
                 NumberOfPreferredNeighbors = Integer.parseInt(comProperties.get("NumberOfPreferredNeighbors").toString());
                 UnchokingInterval = Integer.parseInt(comProperties.get("UnchokingInterval").toString());
