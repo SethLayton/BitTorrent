@@ -1,16 +1,19 @@
 import java.net.*;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.*;
 import java.text.MessageFormat;
 import java.util.BitSet;
+import java.nio.file.*;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class peerProcess 
 {
     public static void main(String[] args) throws Exception 
     {
         PeerInfo MyPeer = PeerInfo.getPeerInfo(java.net.InetAddress.getLocalHost().toString().split("/")[0]);
-		
         try
         {
             if(PeerInfo.MyPeerId != Common.GetSmallestPeerId())
@@ -21,7 +24,7 @@ public class peerProcess
                     if (p.PeerId < PeerInfo.MyPeerId) 
                     {   
                         System.out.println("Attempting to connect to client: " + p.PeerId + " " + p.HostName);   
-                        new Handler(p).start();
+                        new Handler(p, MyPeer).start();
                     }
                 }                
             }
@@ -66,12 +69,14 @@ public class peerProcess
         private Socket connection;
         private DataInputStream in;	//stream read from the socket
         private DataOutputStream out;    //stream write to the socket
-        Charset charset = StandardCharsets.UTF_16;
+        //Charset charset = StandardCharsets.UTF_16;
         //byte handshakeheader[] = "P2PFILESHARINGPROJ".getBytes(charset);
         //byte handshakezbits[] = "0000000000".getBytes(charset);
         byte handshakepid[];
         private PeerInfo MyPeer;
         private PeerInfo connectedPeer;
+        Boolean client = false;
+        Boolean bitSent = false;
 
         public Handler(Socket connection, PeerInfo p) 
         {
@@ -79,12 +84,14 @@ public class peerProcess
             this.MyPeer = p;
         }
 
-        public Handler( PeerInfo p) 
+        public Handler( PeerInfo p, PeerInfo myp) 
         {
             try
 			{
+                this.MyPeer = myp;
                 this.connectedPeer = p;
                 connection = new Socket(connectedPeer.HostName, connectedPeer.PortNumber);
+                client = true;
             }
             catch (IOException e) 
 			{
@@ -114,6 +121,13 @@ public class peerProcess
                 {
                     while(true)
                     {
+                        if (client && (connectedPeer == null || !PeerInfo.isHandShake(connectedPeer.PeerId)))
+                        {
+                            handshakepid = Integer.toString(MyPeer.PeerId).getBytes();
+                            sendMessage(Common.concat(Message.handshakeheader,Message.handshakezbits,handshakepid));
+                            //PeerInfo.SetHandshake(connectedPeer.PeerId, true);
+                            //client = false;
+                        }
                         //receive the message sent from the client
                         int length = in.readInt();
                         byte[] data;
@@ -121,7 +135,7 @@ public class peerProcess
                         {                        
                             data = new byte[length];
                             in.readFully(data, 0, data.length);
-                            message = new String(data, charset);
+                            message = new String(data);
                             if(message.contains("P2PFILESHARINGPROJ") && (connectedPeer == null || !PeerInfo.isHandShake(connectedPeer.PeerId)))
                             {
                                 //Potential need to change here as splitting could give null exception
@@ -131,7 +145,7 @@ public class peerProcess
                                 //System.out.println("Receive message: " + message + " from peer: " + connectedPeer.PeerId);
                                 
                                 //System.out.println("Sending back handshake message to: " + connectedPeer.HostName + " " + connectedPeer.PeerId);
-                                handshakepid = Integer.toString(MyPeer.PeerId).getBytes(charset);
+                                handshakepid = Integer.toString(MyPeer.PeerId).getBytes();
                                 sendMessage(Common.concat(Message.handshakeheader,Message.handshakezbits,handshakepid));
                                 PeerInfo.SetHandshake(connectedPeer.PeerId, true);
                                 for (PeerInfo.Pair<Integer, Boolean> b : PeerInfo.hShakeArray) 
@@ -142,29 +156,78 @@ public class peerProcess
                             }
                             else
                             {  
-                                
-                                data = new byte[length];
-                                in.readFully(data, 0, data.length);
+                                if (!bitSent)
+                                {
+                                    byte[] temp = Message.createBitfield(MyPeer.MyFileBits);
+                                    sendMessage(temp);
+                                    StringBuilder ss = new StringBuilder();
+                                    for( int i = 0; i < Common.Piece;  i++ )
+                                    {
+                                        ss.append( PeerInfo.MyFileBits.get(i) == true ? "1" : "0" );
+                                        ss.append(" ");
+                                    }
+                                    System.out.println("MyFileBits " + ss);
+                                    bitSent = true;
+                                }
                                 ArrayList<byte[]> fields = Message.parseMessage(data);
 
-                                switch (Integer.parseInt(fields.get(1).toString()))
+                                switch (fields.get(1)[0])
                                 {
                                     case 0: //choke
+
                                         break;
                                     case 1: //unchoke
+
                                         break;
                                     case 2: //interested
+                                        connectedPeer.interested = true;
                                         break;
                                     case 3: //not interested
+                                        connectedPeer.interested = false;
                                         break;
                                     case 4: //have
+                                        ByteBuffer bb = ByteBuffer.wrap(fields.get(2));
+                                        int temp1 = bb.getInt();
+                                        if (!PeerInfo.MyFileBits.get(temp1))
+                                        {
+                                            sendMessage(Message.createInterested());
+                                        }
+                                        connectedPeer.FileBits.set(temp1);
                                         break;
                                     case 5: //bitfield
-                                        
+                                        //System.out.println("Received a bitfield back");
+                                        connectedPeer.FileBits = BitSet.valueOf(fields.get(2));
+                                        if (!client)
+                                        {
+                                            byte[] temp = Message.createBitfield(MyPeer.MyFileBits);
+                                            sendMessage(temp);
+                                        }
+                                        else
+                                        {
+                                            BitSet temp = PeerInfo.MyFileBits;
+                                            BitSet temp2 = connectedPeer.FileBits;
+                                            temp.xor(temp2);                                            
+                                            temp2.and(temp);
+                                            if (!temp2.isEmpty())
+                                            {
+                                                sendMessage(Message.createInterested());
+                                            }
+                                            else
+                                                sendMessage(Message.createNotInterested());
+
+                                        }
                                         break;
                                     case 6: //request
+                                        ByteBuffer rbb = ByteBuffer.wrap(fields.get(2));
+                                        int rindex = rbb.getInt();
+                                        int rstart = rindex * Common.PieceSize;
+                                        byte[] filechunk = Arrays.copyOfRange(PeerInfo.MyFile, rstart, rstart + Common.PieceSize);
+                                        sendMessage(Message.createPiece(Common.concat(fields.get(2), filechunk)));
                                         break;
                                     case 7: //piece
+                                        ByteBuffer pbb = ByteBuffer.wrap(Arrays.copyOfRange(fields.get(2),0,4));
+                                        int pindex = pbb.getInt();
+                                        System.arraycopy(fields.get(2), 4, PeerInfo.MyFile, pindex, Common.PieceSize);
                                         break;
                                 }
 

@@ -17,8 +17,8 @@ public class Common
     public static int UnchokingInterval;
     public static int OptimisticUnchokingInterval;
     public static String FileName;
-    public static Long FileSize;
-    public static Long PieceSize;
+    public static int FileSize;
+    public static int PieceSize;
     public static int Piece;
 
     //List of PeerInfo that is initialized from the PeerInfo.cfg on startup and then
@@ -44,8 +44,8 @@ public class Common
                 UnchokingInterval = Integer.parseInt(comProperties.get("UnchokingInterval").toString());
                 OptimisticUnchokingInterval = Integer.parseInt(comProperties.get("OptimisticUnchokingInterval").toString());
                 FileName = comProperties.get("FileName").toString();
-                FileSize = Long.parseLong(comProperties.get("FileSize").toString());
-                PieceSize = Long.parseLong(comProperties.get("PieceSize").toString());
+                FileSize = Integer.parseInt(comProperties.get("FileSize").toString());
+                PieceSize = Integer.parseInt(comProperties.get("PieceSize").toString());
                 Piece = (int)(Math.ceil((double)FileSize/PieceSize));
                 
                 _cinit = true;

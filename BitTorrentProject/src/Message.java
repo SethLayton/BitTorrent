@@ -9,8 +9,8 @@ import java.nio.ByteBuffer;
 public class Message {
 
     Charset charset = StandardCharsets.UTF_16;
-    byte[] msgLength = new byte[4];
-    byte[] msgType = new byte[1];
+    static byte[] msgLength = new byte[4];
+    static byte[] msgType = new byte[1];
     public static byte handshakeheader[] = "P2PFILESHARINGPROJ".getBytes();
     public static byte handshakezbits[] = "0000000000".getBytes();
     ArrayList<byte[]> fields = new ArrayList<byte[]>();
@@ -19,10 +19,9 @@ public class Message {
     public static ArrayList<byte[]> parseMessage (byte[] bArray)
     {
         ArrayList<byte[]> ListReturn = new ArrayList<byte[]>();
-        ListReturn.add(Arrays.copyOfRange(bArray, 0, 3));
-        ListReturn.add(Arrays.copyOfRange(bArray, 4, 4));
-        int temp = 5 + Integer.parseInt(ListReturn.get(0).toString());
-        ListReturn.add(Arrays.copyOfRange(bArray, 5, temp));
+        ListReturn.add(Arrays.copyOfRange(bArray, 0, 4));
+        ListReturn.add(Arrays.copyOfRange(bArray, 4, 5));
+        ListReturn.add(Arrays.copyOfRange(bArray, 5, bArray.length));
         return ListReturn;
     }
 
@@ -59,7 +58,7 @@ public class Message {
     }
 
     // Create 'interested' message
-    byte[] createInterested() {
+    public static byte[] createInterested() {
 
         // Message length will be 1 and the type will be 2
         msgLength = ByteBuffer.allocate(4).putInt(1).array();
@@ -70,7 +69,7 @@ public class Message {
     }
 
     // Create 'not interested' message
-    byte[] createNotInterested() {
+    public static byte[] createNotInterested() {
 
         // Message length will be 1 and the type will be 3
         msgLength = ByteBuffer.allocate(4).putInt(1).array();
@@ -81,7 +80,7 @@ public class Message {
     }
 
     // Create 'have' message
-    byte[] createHave(byte[] indexField) {
+    public static byte[] createHave(byte[] indexField) {
 
         // Message length will be 5 and the type will be 4
         msgLength = ByteBuffer.allocate(4).putInt(5).array();
@@ -92,7 +91,7 @@ public class Message {
     }
 
     // Create 'bitfield' message
-    byte[] createBitfield(BitSet bitfield) {
+    public static byte[] createBitfield(BitSet bitfield) {
 
         // Message length will depend on bitfield length and the type will be 5
         msgLength = ByteBuffer.allocate(4).putInt(1 + bitfield.toByteArray().length).array();
@@ -103,7 +102,7 @@ public class Message {
     }
 
     // Create 'request' message
-    byte[] createRequest(byte[] indexField) {
+    public static byte[] createRequest(byte[] indexField) {
 
         // Message length will be 5 and the type will be 6
         msgLength = ByteBuffer.allocate(4).putInt(5).array();
@@ -114,7 +113,7 @@ public class Message {
     }
 
     // Create 'piece' message
-    byte[] createPiece(byte[] indexField) {
+    public static byte[] createPiece(byte[] indexField) {
 
         // Message length will be 5 and the type will be 7
         msgLength = ByteBuffer.allocate(4).putInt(5).array();
