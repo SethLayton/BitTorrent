@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.*;
 import java.text.MessageFormat;
 import java.util.BitSet;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.nio.file.*;
 
 import java.util.ArrayList;
@@ -11,9 +13,11 @@ import java.util.Arrays;
 
 public class peerProcess 
 {
+    static BlockingQueue<int[]> queue = new LinkedBlockingQueue<int[]>();
     public static void main(String[] args) throws Exception 
     {
         PeerInfo MyPeer = PeerInfo.getPeerInfo(java.net.InetAddress.getLocalHost().toString().split("/")[0]);
+        
         try
         {
             if(PeerInfo.MyPeerId != Common.GetSmallestPeerId())
@@ -121,12 +125,16 @@ public class peerProcess
                 {
                     while(true)
                     {
+                        int[] msg = queue.peek();
+                        if (msg != null && msg[0] == connectedPeer.PeerId) 
+                        {   
+                            msg = queue.poll();
+                            sendMessage(Message.createHave(ByteBuffer.allocate(4).putInt(msg[0]).array()));
+                        }
                         if (client && (connectedPeer == null || !PeerInfo.isHandShake(connectedPeer.PeerId)))
                         {
                             handshakepid = Integer.toString(MyPeer.PeerId).getBytes();
                             sendMessage(Common.concat(Message.handshakeheader,Message.handshakezbits,handshakepid));
-                            //PeerInfo.SetHandshake(connectedPeer.PeerId, true);
-                            //client = false;
                         }
                         //receive the message sent from the client
                         int length = in.readInt();
@@ -140,11 +148,7 @@ public class peerProcess
                             {
                                 //Potential need to change here as splitting could give null exception
                                 connectedPeer = PeerInfo.getPeerInfo(Integer.parseInt(Common.removeBadFormat(message.split("0000000000")[1])));
-                                //show the message to the user
                                 Log.Write(MessageFormat.format("Peer {0} is connected from Peer {1}", PeerInfo.MyPeerId, connectedPeer.PeerId));
-                                //System.out.println("Receive message: " + message + " from peer: " + connectedPeer.PeerId);
-                                
-                                //System.out.println("Sending back handshake message to: " + connectedPeer.HostName + " " + connectedPeer.PeerId);
                                 handshakepid = Integer.toString(MyPeer.PeerId).getBytes();
                                 sendMessage(Common.concat(Message.handshakeheader,Message.handshakezbits,handshakepid));
                                 PeerInfo.SetHandshake(connectedPeer.PeerId, true);
@@ -158,7 +162,7 @@ public class peerProcess
                             {  
                                 if (!bitSent)
                                 {
-                                    byte[] temp = Message.createBitfield(MyPeer.MyFileBits);
+                                    byte[] temp = Message.createBitfield(PeerInfo.MyFileBits);
                                     sendMessage(temp);
                                     StringBuilder ss = new StringBuilder();
                                     for( int i = 0; i < Common.Piece;  i++ )
@@ -176,15 +180,19 @@ public class peerProcess
                                     case 0: //choke
 
                                         break;
+
                                     case 1: //unchoke
 
                                         break;
+
                                     case 2: //interested
                                         connectedPeer.interested = true;
                                         break;
+
                                     case 3: //not interested
                                         connectedPeer.interested = false;
                                         break;
+
                                     case 4: //have
                                         ByteBuffer bb = ByteBuffer.wrap(fields.get(2));
                                         int temp1 = bb.getInt();
@@ -194,12 +202,12 @@ public class peerProcess
                                         }
                                         connectedPeer.FileBits.set(temp1);
                                         break;
+
                                     case 5: //bitfield
-                                        //System.out.println("Received a bitfield back");
                                         connectedPeer.FileBits = BitSet.valueOf(fields.get(2));
                                         if (!client)
                                         {
-                                            byte[] temp = Message.createBitfield(MyPeer.MyFileBits);
+                                            byte[] temp = Message.createBitfield(PeerInfo.MyFileBits);
                                             sendMessage(temp);
                                         }
                                         else
@@ -217,6 +225,7 @@ public class peerProcess
 
                                         }
                                         break;
+
                                     case 6: //request
                                         ByteBuffer rbb = ByteBuffer.wrap(fields.get(2));
                                         int rindex = rbb.getInt();
@@ -224,10 +233,20 @@ public class peerProcess
                                         byte[] filechunk = Arrays.copyOfRange(PeerInfo.MyFile, rstart, rstart + Common.PieceSize);
                                         sendMessage(Message.createPiece(Common.concat(fields.get(2), filechunk)));
                                         break;
+
                                     case 7: //piece
                                         ByteBuffer pbb = ByteBuffer.wrap(Arrays.copyOfRange(fields.get(2),0,4));
                                         int pindex = pbb.getInt();
                                         System.arraycopy(fields.get(2), 4, PeerInfo.MyFile, pindex, Common.PieceSize);
+
+                                        //TODO: Handle sending the 'have' message to all other peers.
+                                        for (PeerInfo pi : Common.Peers) 
+                                        {
+                                            if (pi.PeerId != PeerInfo.MyPeerId)
+                                            {
+                                                queue.put(new int[] {pi.PeerId, pindex});
+                                            }
+                                        }
                                         break;
                                 }
 
