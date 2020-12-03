@@ -1,7 +1,12 @@
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+
+import javax.sound.midi.SysexMessage;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -17,9 +22,9 @@ public class PeerInfo {
     public int PortNumber;
     public boolean HasFile;
     public BitSet FileBits;
-    public boolean choked;
+    public boolean peerUnChoked = false;
     public boolean optUnchoked;
-    public static long downloadRate;
+    public Integer downloadRate;
     public boolean interested;
     public static List<Pair<Integer, Boolean>> hShakeArray = new ArrayList<Pair<Integer, Boolean>>();
     public static List<Pair<Integer, String>> interestedArray = new ArrayList<Pair<Integer, String>>();
@@ -33,6 +38,7 @@ public class PeerInfo {
     public static boolean MyHasFile;
     public static BitSet MyFileBits;
     public static byte[] MyFile;
+    public static boolean myUnChoked = false;
 
     // Singleton variables
     public static int Pieces;
@@ -40,14 +46,14 @@ public class PeerInfo {
 
     public static class DownloadRate {
         // This is a 'globally' accessed list. Needs to be thread safe
-        public static List<Pair<Integer, Float>> dRateList = new ArrayList<Pair<Integer, Float>>();
+        public static List<Pair<Integer, Integer>> dRateList = new ArrayList<Pair<Integer, Integer>>();
 
         public DownloadRate() {
             try {
                 List<PeerInfo> pInf = Common.getPeers();
                 for (PeerInfo p : pInf) {
                     if (p.PeerId != MyPeerId)
-                        dRateList.add(new Pair<Integer, Float>(p.PeerId, (float) 0));
+                        dRateList.add(new Pair<Integer, Integer>(p.PeerId, 0));
                 }
             } catch (Exception e) {
                 Log.Write("Exception in downloadRate default constructor: " + e.getMessage());
@@ -64,11 +70,11 @@ public class PeerInfo {
 
         // Returns the highest download rate currently stored in the list
         // Don't know if this is actually useful
-        public static Float getHighestDownload() {
+        public static Integer getHighestDownload() {
             // default instantiate this return value
-            Float highDownload = dRateList.get(0).getRight();
+            Integer highDownload = dRateList.get(0).getRight();
             try {
-                for (Pair<Integer, Float> p : dRateList) {
+                for (Pair<Integer, Integer> p : dRateList) {
                     if (p.getRight() > highDownload)
                         highDownload = p.getRight();
                 }
@@ -93,15 +99,16 @@ public class PeerInfo {
         // rate > 0
         public static Integer[] getHighestDownloadRates() {
             // default instantiate this return value
-            Integer[] highDownloads = new Integer[Common.NumberOfPreferredNeighbors + 1];
-            int count = 0;
+
+            List<Integer> newlist = new ArrayList<>();
+            //int count = 0;
             try {
-                for (Pair<Integer, Float> p : dRateList) {
-                    if (p.getRight() > 0) {
-                        highDownloads[count] = p.getLeft();
-                        count++;
-                    }
+                
+                for (Pair<Integer, Integer> p : dRateList) {
+                    if (p.getRight() >= 0) 
+                        newlist.add(p.getLeft());
                 }
+            
             } catch (Exception e) {
                 Log.Write("Exception in getHighestDownloadRates: " + e.getMessage());
                 System.out.println("Exception in getHighestDownloadRates: " + e.getMessage());
@@ -112,7 +119,17 @@ public class PeerInfo {
                 String sStackTrace = sw.toString(); // stack trace as a string
                 System.out.println(sStackTrace);
             }
-
+            if (newlist.isEmpty())
+            {
+                System.out.println("newlist.isEmpty");
+                return null;
+            }
+            Collections.sort(newlist);
+            Integer[] highDownloads = new Integer[Common.Peers.size() - 1];
+            for(int i = 0; i < Common.Peers.size() - 1; i++) {
+                highDownloads[i] = newlist.get(i);
+                //System.out.println("Highest: " + newlist.get(i));
+            }
             return highDownloads;
         }
 
@@ -120,27 +137,21 @@ public class PeerInfo {
         // Pass in the currently sending (uploading to this client) peers and their
         // downloadspeeds
         // reset the rest of the list back to a 0 download rate
-        public static void setDownloadRate(List<Pair<Integer, Float>> rates) {
-            try {
-                for (Pair<Integer, Float> p : rates) {
-                    if (Common.PeerIds.contains(p.getLeft())) {
-                        for (int i = 0; i < dRateList.size(); i++) {
-                            Integer temp = dRateList.get(i).left;
-                            if (temp.intValue() == p.getLeft().intValue()) {
-                                dRateList.set(i, p);
-                            } else
-                                dRateList.set(i, new Pair<Integer, Float>(dRateList.get(i).getLeft(), (float) 0));
-                        }
-                    } else {
-                        Log.Write("Exception in setDownloadRate: peerId passed in (" + p.getLeft()
-                                + ") does not belong to the group of peers.");
-                        System.out.println("Exception in setDownloadRate: peerId passed in (" + p.getLeft()
-                                + ") does not belong to the group of peers.");
-                    }
+        public static void resetDownloadRates() 
+        {
+            try 
+            {
+                dRateList.clear();
+                List<PeerInfo> pInf = Common.getPeers();
+                for (PeerInfo p : pInf) 
+                {
+                    if (p.PeerId != MyPeerId)
+                        dRateList.add(new PeerInfo.Pair<Integer, Integer>(p.PeerId, 0));
                 }
+                
             } catch (Exception e) {
-                Log.Write("Exception in setDownloadRate: " + e.getMessage());
-                System.out.println("Exception in setDownloadRate: " + e.getMessage());
+                Log.Write("Exception in resetDownloadRates: " + e.getMessage());
+                System.out.println("Exception in resetDownloadRates: " + e.getMessage());
                 System.err.println("Error: " + e.getMessage() + "\n");
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
@@ -149,7 +160,22 @@ public class PeerInfo {
                 System.out.println(sStackTrace);
             }
         }
+
+        public static void setDownloadRate (Integer peer, Integer rate)
+        {
+            int count = 0;
+            for(Pair<Integer, Integer> p : dRateList)
+            {
+                if (p.getLeft() == peer)
+                {
+                    dRateList.get(count).setRight(rate);                
+                }
+                count ++;
+            }
+        }
     }
+
+    
 
     public static class UnchokedNeighbors {
         // True = unchoked
@@ -160,8 +186,10 @@ public class PeerInfo {
             try {
                 List<PeerInfo> pInf = Common.getPeers();
                 for (PeerInfo p : pInf) {
-                    if (p.PeerId != MyPeerId)
-                        unchokedNeighbors.add(new Pair<Integer, Boolean>(p.PeerId, false));
+                    if (p.PeerId != PeerInfo.MyPeerId)
+                        {
+                            unchokedNeighbors.add(new Pair<Integer, Boolean>(p.PeerId, false));
+                        }
                 }
             } catch (Exception e) {
                 Log.Write("Exception in UnchokedNeighbors default constructor: " + e.getMessage());
@@ -178,11 +206,15 @@ public class PeerInfo {
 
         public static void setUnchokedNeighbors(Integer[] pIds) {
 
+            if (pIds == null)
+                return;
             for (int i = 0; i < unchokedNeighbors.size(); i++) {
                 Pair<Integer, Boolean> p = unchokedNeighbors.get(i);
                 boolean modified = false;
                 for (Integer id : pIds) {
                     if (p.getLeft() == id) {
+                        
+                        System.out.println("setting unchoked for: " + id);
                         unchokedNeighbors.get(i).setRight(true);
                         modified = true;
                     }
@@ -197,11 +229,13 @@ public class PeerInfo {
         }
 
         public static void setOptUnchoked(Integer pId) {
-
+            if (pId == null)
+                return;
             for (int i = 0; i < unchokedNeighbors.size(); i++) {
                 Pair<Integer, Boolean> p = unchokedNeighbors.get(i);
 
                 if (p.getLeft() == pId) {
+                    System.out.println("setting Optunchoked for: " + pId);
                     unchokedNeighbors.get(i).setRight(true);
                 }
 
@@ -214,6 +248,8 @@ public class PeerInfo {
             Random r = new Random();
             boolean found = false;
             int a;
+            if (unchokedNeighbors.size() == 0)
+                return null;
             do {
                 a = r.nextInt(unchokedNeighbors.size());
                 if (!unchokedNeighbors.get(a).getRight()) {
@@ -414,8 +450,7 @@ public class PeerInfo {
           if (!(o instanceof Pair)) return false;
           @SuppressWarnings("unchecked")
           Pair<L,R> pairo = (Pair<L,R>) o;
-          return this.left.equals(pairo.getLeft()) &&
-                 this.right.equals(pairo.getRight());
+          return this.left.equals(pairo.getLeft());
         }
       
       }

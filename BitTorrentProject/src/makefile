@@ -6,7 +6,11 @@ JC = javac
 
 CLASSES = \
 		Client.java \
-		peerProcess.java
+		peerProcess.java \
+		PeerInfo.java \
+		ChokingInterval.java \
+		Message.java \
+		Common.java
 
 default: classes
 

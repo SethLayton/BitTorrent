@@ -36,7 +36,7 @@ public class Message {
     }
 
     // Create 'choke' message
-    byte[] createChoke() {
+    public static byte[] createChoke() {
         
         // Message length will be 1 and the type will be 0
         msgLength = ByteBuffer.allocate(4).putInt(1).array();
@@ -47,7 +47,7 @@ public class Message {
     }
 
     // Create 'unchoke' message
-    byte[] createUnchoke() {
+    public static byte[] createUnchoke() {
 
         // Message length will be 1 and the type will be 1
         msgLength = ByteBuffer.allocate(4).putInt(1).array();
@@ -80,14 +80,14 @@ public class Message {
     }
 
     // Create 'have' message
-    public static byte[] createHave(byte[] indexField, byte[] content) {
+    public static byte[] createHave(byte[] indexField) {
 
         // Message length will be 5 and the type will be 4
         msgLength = ByteBuffer.allocate(4).putInt(5).array();
         msgType[0] = 4;
 
         // Return final byte array
-        return Common.concat(msgLength, msgType, indexField, content);
+        return Common.concat(msgLength, msgType, indexField);
     }
 
     // Create 'bitfield' message

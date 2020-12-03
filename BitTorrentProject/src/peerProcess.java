@@ -24,6 +24,9 @@ public class peerProcess
     {
         PeerInfo MyPeer = PeerInfo.getPeerInfo(java.net.InetAddress.getLocalHost().toString().split("/")[0]);
 
+        System.out.println("starting choking  ");
+        ChokingInterval choke = new ChokingInterval(Common.NumberOfPreferredNeighbors, Common.Peers.size(), Common.UnchokingInterval, Common.OptimisticUnchokingInterval);
+
         try 
         {
             if (PeerInfo.MyPeerId != Common.GetSmallestPeerId()) 
@@ -33,7 +36,7 @@ public class peerProcess
                 {
                     if (p.PeerId < PeerInfo.MyPeerId) 
                     {
-                        System.out.println("Attempting to connect to client: " + p.PeerId + " " + p.HostName);
+                        //System.out.println("Attempting to connect to client: " + p.PeerId + " " + p.HostName);
                         new Handler(p, MyPeer).start();
                         //new Handler(p, MyPeer, true).start();
                     }
@@ -65,10 +68,7 @@ public class peerProcess
                 listener.close();
             }
         }
-        // System.out.println("finished connecting");
-        // ChokingInterval choke = new
-        // ChokingInterval(Common.NumberOfPreferredNeighbors, Common.Peers.size(),
-        // Common.UnchokingInterval, Common.OptimisticUnchokingInterval);
+        
 
     }
 
@@ -88,7 +88,6 @@ public class peerProcess
         private PeerInfo connectedPeer;
         Boolean client = false;
         Boolean bitSent = false;
-        Boolean Have = false;
 
         public Handler(Socket connection, PeerInfo p) 
         {
@@ -121,32 +120,7 @@ public class peerProcess
             }
         }
 
-        public Handler(PeerInfo p, PeerInfo myp, Boolean have) 
-        {
-            System.out.println("starting Have only thread for: " + p.PeerId);
-            try 
-            {
-                this.MyPeer = myp;
-                this.connectedPeer = p;
-                connection = new Socket(connectedPeer.HostName, connectedPeer.PortNumber);
-                Have = have;
-            } 
-            catch (IOException e) 
-            {
-                System.err.println("Connection closed with: " + connectedPeer.HostName);
-                PeerInfo.SetHandshake(connectedPeer.PeerId, false);
-            } 
-            catch (Exception e) 
-            {
-                System.err.println("Error: " + e.getMessage() + "\n");
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                String sStackTrace = sw.toString();
-                System.out.println(sStackTrace);
-            }
-        }
-
+       
         public void run() 
         {
             try
@@ -155,36 +129,56 @@ public class peerProcess
                 out = new DataOutputStream(connection.getOutputStream());
                 out.flush();
                 in = new DataInputStream(connection.getInputStream());      
-                
-                // if (Have) 
-                // {
-                //     while (true) 
-                //     {
-                //         int msg[] = queue.peek();
-                //         if (msg != null && msg[0] == connectedPeer.PeerId)
-                //         {
-                //             int sMsg[] = queue.poll();
-                //             int index = sMsg[1];
-                //             System.out.println("Sending have piece " + index + " to peer: " + connectedPeer.PeerId);
-                //             String haveMsg = "Have";
-                //             sendMessage(Message.createHave(ByteBuffer.allocate(4).putInt(index).array(),haveMsg.getBytes()));
-                //         }
-                //     }
-                // }
-                
+                                
                 try
                 {
                     while(true)
                     {
-                       
+                        if (connectedPeer != null)
+                        {
+                            for (PeerInfo.Pair<Integer,Boolean> p : PeerInfo.UnchokedNeighbors.unchokedNeighbors) 
+                            {
+                                if (p.getLeft() == PeerInfo.MyPeerId)
+                                {
+                                    if (connectedPeer.peerUnChoked ^ p.getRight())
+                                    {
+                                        if (p.getRight())
+                                        {
+                                            //send unchoked
+                                            System.out.println("Sending unchoke to " + connectedPeer.PeerId);
+                                            sendMessage(Message.createUnchoke());
+                                            connectedPeer.peerUnChoked = !connectedPeer.peerUnChoked;
+                                        }
+                                        else
+                                        {
+                                            //send choked
+                                            System.out.println("Sending choke to " + connectedPeer.PeerId);
+                                            sendMessage(Message.createChoke());
+                                            connectedPeer.peerUnChoked = !connectedPeer.peerUnChoked;
+                                        }
+                                    }
+                                    
+                                }
+                            }
+                        }
+                        int msg[] = queue.peek();
+                        if (msg != null  && connectedPeer.PeerId == msg[0])
+                        {
+                            int sMsg[] = queue.poll();
+                            int index = sMsg[1];
+                            System.out.println("Sending have piece " + index + " to peer: " + connectedPeer.PeerId);
+                            sendMessage(Message.createHave(ByteBuffer.allocate(4).putInt(index).array()));
+                        }
                         if (client && (connectedPeer == null || !PeerInfo.isHandShake(connectedPeer.PeerId)))
                         {
                             handshakepid = Integer.toString(MyPeer.PeerId).getBytes();
                             sendMessage(Common.concat(Message.handshakeheader,Message.handshakezbits,handshakepid));
                         }
-                        
-                        //receive the message sent from the client
-                        int length = in.readInt();
+                        int length = 0;
+                        if (in.available() > 0)
+                        {
+                            length = in.readInt();
+                        }
                         byte[] data;
                         if(length>0) 
                         {                        
@@ -193,23 +187,6 @@ public class peerProcess
                             if (data != null)
                             {
                                 ArrayList<byte[]> fields = Message.parseMessage(data);
-                                // if (fields.get(1)[0] == 4 && Arrays.toString(fields.get(2)) == "Have")
-                                // {
-                                //     System.out.println("received have from: " + connectedPeer.PeerId);
-                                //     ByteBuffer bb = ByteBuffer.wrap(fields.get(2));
-                                //     int temp1 = bb.getInt();
-                                //     readWriteLock.readLock().lock();
-                                //     BitSet HaveMyFileBitsClone = (BitSet)PeerInfo.MyFileBits.clone();
-                                //     readWriteLock.readLock().unlock();
-                                //     if (!HaveMyFileBitsClone.get(temp1))
-                                //     {
-                                //         System.out.println("sending interested to: " + connectedPeer.PeerId);
-                                //         sendMessage(Message.createInterested());
-                                //     }
-                                //     //No need to thread safe access as this FileBits is only for this thread
-                                //     connectedPeer.FileBits.set(temp1);
-                                //     break;
-                                // }
                                 message = new String(data);
                                 if(message.contains("P2PFILESHARINGPROJ") && (connectedPeer == null || !PeerInfo.isHandShake(connectedPeer.PeerId)))
                                 {
@@ -229,7 +206,6 @@ public class peerProcess
                                 }
                                 else
                                 {  
-                                    //System.out.println("bitSent: " + bitSent + " client: " + client);
                                     if (!bitSent && !client)
                                     {
                                         readWriteLock.readLock().lock();
@@ -238,20 +214,15 @@ public class peerProcess
 
                                         System.out.println("sending bitfield to: " + connectedPeer.PeerId);
                                         sendMessage(Message.createBitfield(MyFileBitsClone));
-                                        // StringBuilder ss = new StringBuilder();
-                                        // for( int i = 0; i < Common.Piece;  i++ )
-                                        // {
-                                        //     ss.append( MyFileBitsClone.get(i) == true ? "1" : "0" );
-                                        //     ss.append(" ");
-                                        // }
-                                        // System.out.println("MyFileBits " + ss);
                                         bitSent = true;
                                     }
+                                                                      
 
                                     switch (fields.get(1)[0])
                                     {
                                         case 0: //choke
                                             //What do here? anything? update some running list?
+                                            PeerInfo.myUnChoked = false;
                                             break;
 
                                         case 1: //unchoke
@@ -260,6 +231,7 @@ public class peerProcess
                                             //Doing it when we actually get the piece in. So we can avoid requesting the same piece twice easier
                                             //There could still be the issue where we randomly request the same piece here if two threads are at this
                                             //unchoke requesting phase at the same time, but it's much smaller
+                                            PeerInfo.myUnChoked = true;
                                             System.out.println("received unchoke from: " + connectedPeer.PeerId);
                                             readWriteLock.writeLock().lock();
                                             int index = 0;
@@ -303,21 +275,21 @@ public class peerProcess
                                             // }
                                             break;
 
-                                        // case 4: //have
-                                        //     System.out.println("received have from: " + connectedPeer.PeerId);
-                                        //     ByteBuffer bb = ByteBuffer.wrap(fields.get(2));
-                                        //     int temp1 = bb.getInt();
-                                        //     readWriteLock.readLock().lock();
-                                        //     BitSet HaveMyFileBitsClone = (BitSet)PeerInfo.MyFileBits.clone();
-                                        //     readWriteLock.readLock().unlock();
-                                        //     if (!HaveMyFileBitsClone.get(temp1))
-                                        //     {
-                                        //         System.out.println("sending interested to: " + connectedPeer.PeerId);
-                                        //         sendMessage(Message.createInterested());
-                                        //     }
-                                        //     //No need to thread safe access as this FileBits is only for this thread
-                                        //     connectedPeer.FileBits.set(temp1);
-                                        //     break;
+                                        case 4: //have
+                                            System.out.println("received have from: " + connectedPeer.PeerId);
+                                            ByteBuffer bb = ByteBuffer.wrap(fields.get(2));
+                                            int temp1 = bb.getInt();
+                                            readWriteLock.readLock().lock();
+                                            BitSet HaveMyFileBitsClone = (BitSet)PeerInfo.MyFileBits.clone();
+                                            readWriteLock.readLock().unlock();
+                                            if (!HaveMyFileBitsClone.get(temp1))
+                                            {
+                                                System.out.println("sending interested to: " + connectedPeer.PeerId);
+                                                sendMessage(Message.createInterested());
+                                            }
+                                            //No need to thread safe access as this FileBits is only for this thread
+                                            connectedPeer.FileBits.set(temp1);
+                                            break;
 
                                         case 5: //bitfield
                                             System.out.println("received bitfield from: " + connectedPeer.PeerId);
@@ -369,13 +341,19 @@ public class peerProcess
                                             break;
 
                                         case 6: //request
-                                            System.out.println("received request from: " + connectedPeer.PeerId);
-                                            ByteBuffer rbb = ByteBuffer.wrap(fields.get(2));
-                                            int rindex = rbb.getInt();
-                                            int rstart = rindex * Common.PieceSize;
-                                            byte[] filechunk = Arrays.copyOfRange(PeerInfo.MyFile, rstart, rstart + Common.PieceSize);
-                                            System.out.println("sending piece (" + rindex + ") to: " + connectedPeer.PeerId);
-                                            sendMessage(Message.createPiece(Common.concat(fields.get(2), filechunk)));
+                                            if (PeerInfo.myUnChoked)
+                                            {
+                                                System.out.println("received request from: " + connectedPeer.PeerId);
+                                                ByteBuffer rbb = ByteBuffer.wrap(fields.get(2));
+                                                int rindex = rbb.getInt();
+                                                int rstart = rindex * Common.PieceSize;
+                                                byte[] filechunk = Arrays.copyOfRange(PeerInfo.MyFile, rstart, rstart + Common.PieceSize);
+                                                System.out.println("sending piece (" + rindex + ") to: " + connectedPeer.PeerId);
+                                                sendMessage(Message.createPiece(Common.concat(fields.get(2), filechunk)));
+                                                connectedPeer.downloadRate += filechunk.length;
+                                                PeerInfo.DownloadRate.setDownloadRate(connectedPeer.PeerId, connectedPeer.downloadRate);
+
+                                            }
                                             break;
 
                                         case 7: //piece
@@ -396,7 +374,7 @@ public class peerProcess
                                             }
                                             System.out.println("MyFileBits " + ss);
                                             readWriteLock.writeLock().unlock(); 
-                                            //System.arraycopy(fields.get(2), 4, PeerInfo.MyFile, pindex, Common.PieceSize);
+                                            System.arraycopy(fields.get(2), 4, PeerInfo.MyFile, pindex, Common.PieceSize);
 
                                             //TODO: Handle sending the 'have' message to all other peers.
                                             for (PeerInfo pi : Common.Peers) 
@@ -427,11 +405,7 @@ public class peerProcess
                             //         + " bitField: " + ss);
                             //     }
                             // }                        
-                        }
-                        else
-                        {
-                            System.out.println("Message of length 0 received");
-                        }   
+                        } 
                     }
                 }
                 catch (IOException e) 

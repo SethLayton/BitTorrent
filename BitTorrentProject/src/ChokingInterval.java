@@ -23,6 +23,8 @@ public class ChokingInterval {
 		this.optUnchokedInterval = optUnchokedInterval;
 		Semaphore sem = new Semaphore(1, true);
 
+		PeerInfo.UnchokedNeighbors ucn = new PeerInfo.UnchokedNeighbors();
+		PeerInfo.DownloadRate dlr = new PeerInfo.DownloadRate();
 
 		Timer timer = new Timer();
 		TimerTask unchokeTask = new Unchoke(sem);
@@ -63,6 +65,7 @@ public class ChokingInterval {
 			}
 			finally
 			{
+				PeerInfo.DownloadRate.resetDownloadRates();
 				sem.release();
 			}
 			
@@ -85,7 +88,7 @@ public class ChokingInterval {
 			{
 				sem.acquire();
 				PeerInfo.UnchokedNeighbors.setUnchokedNeighbors(highestRates);
-
+				
 
 			}
 			catch(Exception e)
