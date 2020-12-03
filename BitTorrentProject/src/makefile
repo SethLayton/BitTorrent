@@ -1,5 +1,16 @@
-javac -d classes PeerInfo.java
-javac -d classes Client.java
-javac -d classes peerProcess.java
-javac -cp jsch-0.1.55.jar -d classes *.java
-java -classpath classes peerProcess.java
+JFLAGS = -g
+JC = javac
+.SUFFIXES: .java .class
+.java.class:
+		$(JC) $(JFLAGS) $*.java
+
+CLASSES = \
+		Client.java \
+		peerProcess.java
+
+default: classes
+
+classes: $(CLASSES:.java=.class)
+
+clean:
+		$(RM) *.class

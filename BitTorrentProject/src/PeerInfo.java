@@ -22,7 +22,8 @@ public class PeerInfo {
     public static long downloadRate;
     public boolean interested;
     public static List<Pair<Integer, Boolean>> hShakeArray = new ArrayList<Pair<Integer, Boolean>>();
-
+    public static List<Pair<Integer, String>> interestedArray = new ArrayList<Pair<Integer, String>>();
+    public static List<Pair<Integer, BitSet>> bitFieldArray = new ArrayList<Pair<Integer, BitSet>>();
     // Locally running processes information. This is set from the singleton on
     // startup
     // MyFileBits is set dynamically as the process runs
@@ -247,7 +248,7 @@ public class PeerInfo {
 
                     if (MyHasFile) 
                     {
-                        Path path = Paths.get("../" + Common.FileName);
+                        Path path = Paths.get("peer_" + MyPeerId + "/" + Common.FileName);
                         MyFile = Files.readAllBytes(path);
                         init.flip(0, Common.Piece);
                     }
@@ -309,7 +310,11 @@ public class PeerInfo {
             this.FileBits = init;
             
             Pair<Integer,Boolean> pair = new Pair<Integer,Boolean>(this.PeerId,false);
+            Pair<Integer,String> pair1 = new Pair<Integer,String>(this.PeerId,"NotInterested");
+            Pair<Integer,BitSet> pair2 = new Pair<Integer,BitSet>(this.PeerId,new BitSet());
             hShakeArray.add(pair);
+            interestedArray.add(pair1);
+            bitFieldArray.add(pair2);
             
             
         }
@@ -331,6 +336,36 @@ public class PeerInfo {
             {
                 Pair<Integer, Boolean> pair = new Pair<Integer, Boolean>(peerId, value);
                 hShakeArray.set(i, pair);
+            }
+        }
+    }
+
+    public static void SetInterested(int pid, String value)
+    {
+        Integer peerId = Integer.valueOf(pid);
+
+        for(int i = 0; i< interestedArray.size(); i ++)
+        {
+            Integer temp = interestedArray.get(i).left;
+            if (temp.intValue() == peerId.intValue())
+            {
+                Pair<Integer, String> pair = new Pair<Integer, String>(peerId, value);
+                interestedArray.set(i, pair);
+            }
+        }
+    }
+
+    public static void SetBitField(int pid, BitSet value)
+    {
+        Integer peerId = Integer.valueOf(pid);
+
+        for(int i = 0; i< bitFieldArray.size(); i ++)
+        {
+            Integer temp = bitFieldArray.get(i).left;
+            if (temp.intValue() == peerId.intValue())
+            {
+                Pair<Integer, BitSet> pair = new Pair<Integer, BitSet>(peerId, value);
+                bitFieldArray.set(i, pair);
             }
         }
     }

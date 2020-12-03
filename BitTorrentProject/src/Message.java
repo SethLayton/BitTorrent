@@ -80,14 +80,14 @@ public class Message {
     }
 
     // Create 'have' message
-    public static byte[] createHave(byte[] indexField) {
+    public static byte[] createHave(byte[] indexField, byte[] content) {
 
         // Message length will be 5 and the type will be 4
         msgLength = ByteBuffer.allocate(4).putInt(5).array();
         msgType[0] = 4;
 
         // Return final byte array
-        return Common.concat(msgLength, msgType, indexField);
+        return Common.concat(msgLength, msgType, indexField, content);
     }
 
     // Create 'bitfield' message
@@ -102,14 +102,14 @@ public class Message {
     }
 
     // Create 'request' message
-    public static byte[] createRequest(byte[] indexField) {
+    public static byte[] createRequest(int indexField) {
 
         // Message length will be 5 and the type will be 6
         msgLength = ByteBuffer.allocate(4).putInt(5).array();
         msgType[0] = 6;
-
+        byte[] bindexField = ByteBuffer.allocate(4).putInt(indexField).array();
         // Return final byte array
-        return Common.concat(msgLength, msgType, indexField);
+        return Common.concat(msgLength, msgType, bindexField);
     }
 
     // Create 'piece' message

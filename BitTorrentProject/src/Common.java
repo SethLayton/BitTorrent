@@ -10,7 +10,6 @@ import java.util.List;
 public class Common 
 {
     //Singleton variables set on startup
-    private static boolean localtest= false;
     private static boolean _cinit = false;
     private static boolean _pinit = false;
     public static int NumberOfPreferredNeighbors;
@@ -20,6 +19,7 @@ public class Common
     public static int FileSize;
     public static int PieceSize;
     public static int Piece;
+    private static boolean localtest= false;
 
     //List of PeerInfo that is initialized from the PeerInfo.cfg on startup and then
     //Updated dynamically while running
@@ -37,9 +37,8 @@ public class Common
         {
             if (!_cinit)
             {
-                
-                localtest = !java.net.InetAddress.getLocalHost().toString().split("/")[0].contains("cise.ufl.edu");
-                comProperties.load(new FileInputStream(localtest ? "BitTorrentProject/Common.cfg" : "../Common.cfg"));                    
+                localtest = java.net.InetAddress.getLocalHost().toString().split("/")[0].equals("Seths-PC");
+                comProperties.load(new FileInputStream(localtest ? "BitTorrentProject/src/Common.cfg" : "Common.cfg"));                    
                 NumberOfPreferredNeighbors = Integer.parseInt(comProperties.get("NumberOfPreferredNeighbors").toString());
                 UnchokingInterval = Integer.parseInt(comProperties.get("UnchokingInterval").toString());
                 OptimisticUnchokingInterval = Integer.parseInt(comProperties.get("OptimisticUnchokingInterval").toString());
@@ -66,7 +65,7 @@ public class Common
             if (!_pinit)
             {
                 //String localMachine = java.net.InetAddress.getLocalHost().toString().split("/")[0]; 
-                File myObj = new File(localtest ? "BitTorrentProject/PeerInfo.cfg" : "../PeerInfo.cfg");
+                File myObj = new File(localtest ? "BitTorrentProject/src/PeerInfo.cfg" : "PeerInfo.cfg");
                 Scanner myReader = new Scanner(myObj);
                 //int listid = 0;
                 while (myReader.hasNextLine()) 
