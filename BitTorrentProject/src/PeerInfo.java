@@ -97,19 +97,22 @@ public class PeerInfo {
         // Since the set function resets all the not currently uploading values to 0
         // This function needs only look at elements in the list that have a download
         // rate > 0
-        public static Integer[] getHighestDownloadRates() {
+        public static Integer[] getHighestDownloadRates() 
+        {
             // default instantiate this return value
-
             List<Integer> newlist = new ArrayList<>();
             //int count = 0;
-            try {
-                
-                for (Pair<Integer, Integer> p : dRateList) {
+            try 
+            {
+                for (Pair<Integer, Integer> p : dRateList) 
+                {
                     if (p.getRight() >= 0) 
                         newlist.add(p.getLeft());
                 }
             
-            } catch (Exception e) {
+            } 
+            catch (Exception e) 
+            {
                 Log.Write("Exception in getHighestDownloadRates: " + e.getMessage());
                 System.out.println("Exception in getHighestDownloadRates: " + e.getMessage());
                 System.err.println("Error: " + e.getMessage() + "\n");
@@ -126,16 +129,13 @@ public class PeerInfo {
             }
             Collections.sort(newlist);
             Integer[] highDownloads = new Integer[Common.Peers.size() - 1];
-            for(int i = 0; i < Common.Peers.size() - 1; i++) {
+            for(int i = 0; i < Common.Peers.size() - 1; i++) 
+            {
                 highDownloads[i] = newlist.get(i);
-                //System.out.println("Highest: " + newlist.get(i));
             }
             return highDownloads;
         }
 
-        // This needs to be updated to be thread safe
-        // Pass in the currently sending (uploading to this client) peers and their
-        // downloadspeeds
         // reset the rest of the list back to a 0 download rate
         public static void resetDownloadRates() 
         {
@@ -149,7 +149,9 @@ public class PeerInfo {
                         dRateList.add(new PeerInfo.Pair<Integer, Integer>(p.PeerId, 0));
                 }
                 
-            } catch (Exception e) {
+            } 
+            catch (Exception e) 
+            {
                 Log.Write("Exception in resetDownloadRates: " + e.getMessage());
                 System.out.println("Exception in resetDownloadRates: " + e.getMessage());
                 System.err.println("Error: " + e.getMessage() + "\n");
@@ -177,21 +179,27 @@ public class PeerInfo {
 
     
 
-    public static class UnchokedNeighbors {
+    public static class UnchokedNeighbors 
+    {
         // True = unchoked
         // False = choked
         public static List<Pair<Integer, Boolean>> unchokedNeighbors = new ArrayList<Pair<Integer, Boolean>>();
 
-        public UnchokedNeighbors() {
-            try {
+        public UnchokedNeighbors() 
+        {
+            try
+            {
                 List<PeerInfo> pInf = Common.getPeers();
-                for (PeerInfo p : pInf) {
+                for (PeerInfo p : pInf) 
+                {
                     if (p.PeerId != PeerInfo.MyPeerId)
-                        {
-                            unchokedNeighbors.add(new Pair<Integer, Boolean>(p.PeerId, false));
-                        }
+                    {
+                        unchokedNeighbors.add(new Pair<Integer, Boolean>(p.PeerId, false));
+                    }
                 }
-            } catch (Exception e) {
+            } 
+            catch (Exception e) 
+            {
                 Log.Write("Exception in UnchokedNeighbors default constructor: " + e.getMessage());
                 System.out.println("Exception in UnchokedNeighbors default constructor: " + e.getMessage());
                 System.err.println("Error: " + e.getMessage() + "\n");
@@ -204,22 +212,26 @@ public class PeerInfo {
 
         }
 
-        public static void setUnchokedNeighbors(Integer[] pIds) {
+        public static void setUnchokedNeighbors(Integer[] pIds) 
+        {
 
             if (pIds == null)
                 return;
-            for (int i = 0; i < unchokedNeighbors.size(); i++) {
+            for (int i = 0; i < unchokedNeighbors.size(); i++) 
+            {
                 Pair<Integer, Boolean> p = unchokedNeighbors.get(i);
                 boolean modified = false;
-                for (Integer id : pIds) {
-                    if (p.getLeft() == id) {
-                        
+                for (Integer id : pIds) 
+                {
+                    if (p.getLeft() == id) 
+                    {                                                
                         System.out.println("setting unchoked for: " + id);
                         unchokedNeighbors.get(i).setRight(true);
                         modified = true;
                     }
                 }
-                if (!modified) {
+                if (!modified) 
+                {
                     unchokedNeighbors.get(i).setRight(false);
                 }
 
@@ -228,13 +240,16 @@ public class PeerInfo {
             return;
         }
 
-        public static void setOptUnchoked(Integer pId) {
+        public static void setOptUnchoked(Integer pId) 
+        {
             if (pId == null)
                 return;
-            for (int i = 0; i < unchokedNeighbors.size(); i++) {
+            for (int i = 0; i < unchokedNeighbors.size(); i++) 
+            {
                 Pair<Integer, Boolean> p = unchokedNeighbors.get(i);
 
-                if (p.getLeft() == pId) {
+                if (p.getLeft() == pId) 
+                {
                     System.out.println("setting Optunchoked for: " + pId);
                     unchokedNeighbors.get(i).setRight(true);
                 }
@@ -244,15 +259,18 @@ public class PeerInfo {
             return;
         }
 
-        public static Integer getOptUnchoked() {
+        public static Integer getOptUnchoked() 
+        {
             Random r = new Random();
             boolean found = false;
             int a;
             if (unchokedNeighbors.size() == 0)
                 return null;
-            do {
+            do 
+            {
                 a = r.nextInt(unchokedNeighbors.size());
-                if (!unchokedNeighbors.get(a).getRight()) {
+                if (!unchokedNeighbors.get(a).getRight()) 
+                {
                     found = true;
                 }
             } while (!found);
@@ -263,17 +281,21 @@ public class PeerInfo {
 
     }
 
-    public static PeerInfo getPeerInfo(String hostname) throws IOException {
+    public static PeerInfo getPeerInfo(String hostname) throws IOException 
+    {
         List<PeerInfo> temp = Common.getPeers();
-        for (PeerInfo pInfo : temp) {
+        for (PeerInfo pInfo : temp) 
+        {
             String hname;
             if (pInfo.HostName.contains(".cise.ufl.edu"))
                 hname = pInfo.HostName.split(".cise.ufl.edu")[0];
             else
                 hname = pInfo.HostName;
 
-            if (hname.equals(hostname)) {
-                if (!_init) {
+            if (hname.equals(hostname)) 
+            {
+                if (!_init) 
+                {
 
                     BitSet init = new BitSet(Common.Piece);
                     MyPeerId = pInfo.PeerId;
