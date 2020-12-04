@@ -3,9 +3,6 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
-
-import javax.sound.midi.SysexMessage;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -44,18 +41,24 @@ public class PeerInfo {
     public static int Pieces;
     private static boolean _init = false;
 
-    public static class DownloadRate {
+    public static class DownloadRate 
+    {
         // This is a 'globally' accessed list. Needs to be thread safe
         public static List<Pair<Integer, Integer>> dRateList = new ArrayList<Pair<Integer, Integer>>();
 
-        public DownloadRate() {
-            try {
+        public DownloadRate() 
+        {
+            try 
+            {
                 List<PeerInfo> pInf = Common.getPeers();
-                for (PeerInfo p : pInf) {
+                for (PeerInfo p : pInf) 
+                {
                     if (p.PeerId != MyPeerId)
                         dRateList.add(new Pair<Integer, Integer>(p.PeerId, 0));
                 }
-            } catch (Exception e) {
+            } 
+            catch (Exception e) 
+            {
                 Log.Write("Exception in downloadRate default constructor: " + e.getMessage());
                 System.out.println("Exception in downloadRate default constructor: " + e.getMessage());
                 System.err.println("Error: " + e.getMessage() + "\n");
@@ -70,15 +73,20 @@ public class PeerInfo {
 
         // Returns the highest download rate currently stored in the list
         // Don't know if this is actually useful
-        public static Integer getHighestDownload() {
+        public static Integer getHighestDownload() 
+        {
             // default instantiate this return value
             Integer highDownload = dRateList.get(0).getRight();
-            try {
-                for (Pair<Integer, Integer> p : dRateList) {
+            try 
+            {
+                for (Pair<Integer, Integer> p : dRateList) 
+                {
                     if (p.getRight() > highDownload)
                         highDownload = p.getRight();
                 }
-            } catch (Exception e) {
+            } 
+            catch (Exception e) 
+            {
                 Log.Write("Exception in getHighestDownload: " + e.getMessage());
                 System.out.println("Exception in getHighestDownload: " + e.getMessage());
                 System.err.println("Error: " + e.getMessage() + "\n");
@@ -224,10 +232,16 @@ public class PeerInfo {
                 for (Integer id : pIds) 
                 {
                     if (p.getLeft() == id) 
-                    {                                                
-                        System.out.println("setting unchoked for: " + id);
-                        unchokedNeighbors.get(i).setRight(true);
-                        modified = true;
+                    {
+                        for(Pair<Integer,Boolean> d : hShakeArray)   
+                        {    
+                            if (d.getLeft() == id && d.getRight())   
+                            {                                                            
+                                System.out.println("setting unchoked for: " + id);
+                                unchokedNeighbors.get(i).setRight(true);
+                                modified = true;
+                            }
+                        }
                     }
                 }
                 if (!modified) 
@@ -250,10 +264,15 @@ public class PeerInfo {
 
                 if (p.getLeft() == pId) 
                 {
-                    System.out.println("setting Optunchoked for: " + pId);
-                    unchokedNeighbors.get(i).setRight(true);
+                    for(Pair<Integer,Boolean> d : hShakeArray)   
+                    {    
+                        if (d.getLeft() == pId && d.getRight())   
+                        { 
+                            System.out.println("setting Optunchoked for: " + pId);
+                            unchokedNeighbors.get(i).setRight(true);
+                        }
+                    }
                 }
-
             }
 
             return;

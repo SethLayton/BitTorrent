@@ -65,7 +65,7 @@ public class ChokingInterval {
 			}
 			finally
 			{
-				PeerInfo.DownloadRate.resetDownloadRates();
+				
 				sem.release();
 			}
 			
@@ -77,7 +77,8 @@ public class ChokingInterval {
 	{
 		public Semaphore sem;
 
-		public Unchoke(Semaphore s) {
+		public Unchoke(Semaphore s) 
+		{
 			this.sem = s;
 		}
 		public void run()
@@ -87,9 +88,7 @@ public class ChokingInterval {
 			try 
 			{
 				sem.acquire();
-				PeerInfo.UnchokedNeighbors.setUnchokedNeighbors(highestRates);
-				
-
+				PeerInfo.UnchokedNeighbors.setUnchokedNeighbors(highestRates);	
 			}
 			catch(Exception e)
 			{
@@ -104,6 +103,7 @@ public class ChokingInterval {
 			}
 			finally
 			{
+				PeerInfo.DownloadRate.resetDownloadRates();
 				sem.release();
 			}
 
