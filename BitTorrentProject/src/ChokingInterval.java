@@ -49,6 +49,8 @@ public class ChokingInterval {
 			{
 				sem.acquire();
 				Integer pId = PeerInfo.UnchokedNeighbors.getOptUnchoked();
+				System.out.println("----------------------------Setting optUnchoked for: " + 
+				(pId == null ? "null" : pId.intValue()));
 				PeerInfo.UnchokedNeighbors.setOptUnchoked(pId);
 				
 			} 

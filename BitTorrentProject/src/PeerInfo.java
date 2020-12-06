@@ -3,7 +3,8 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -17,7 +18,7 @@ public class PeerInfo {
     public int PeerId;
     public String HostName;
     public int PortNumber;
-    public boolean HasFile;
+    public boolean HasFile = false;
     public BitSet FileBits;
     public boolean peerUnChoked = false;
     public boolean optUnchoked;
@@ -25,7 +26,8 @@ public class PeerInfo {
     public boolean interested;
     public static List<Pair<Integer, Boolean>> hShakeArray = new ArrayList<Pair<Integer, Boolean>>();
     public static List<Pair<Integer, String>> interestedArray = new ArrayList<Pair<Integer, String>>();
-    public static List<Pair<Integer, BitSet>> bitFieldArray = new ArrayList<Pair<Integer, BitSet>>();
+    public static List<Pair<Integer, Boolean>> HasFileArray = new ArrayList<Pair<Integer, Boolean>>();
+    public static List<int[]> requestedArray = new ArrayList<int[]>(Common.Piece);
     // Locally running processes information. This is set from the singleton on
     // startup
     // MyFileBits is set dynamically as the process runs
@@ -40,6 +42,9 @@ public class PeerInfo {
     // Singleton variables
     public static int Pieces;
     private static boolean _init = false;
+    private static boolean _init_ = false;
+
+    static ReadWriteLock pReadWriteLock = new ReentrantReadWriteLock();
 
     public static class DownloadRate 
     {
@@ -71,8 +76,6 @@ public class PeerInfo {
 
         }
 
-        // Returns the highest download rate currently stored in the list
-        // Don't know if this is actually useful
         public static Integer getHighestDownload() 
         {
             // default instantiate this return value
@@ -100,22 +103,25 @@ public class PeerInfo {
             return highDownload;
         }
 
-        // returns the PeerId of the top (number of preferred peers) highest
-        // downloadrates
-        // Since the set function resets all the not currently uploading values to 0
-        // This function needs only look at elements in the list that have a download
-        // rate > 0
         public static Integer[] getHighestDownloadRates() 
         {
             // default instantiate this return value
             List<Integer> newlist = new ArrayList<>();
-            //int count = 0;
             try 
             {
                 for (Pair<Integer, Integer> p : dRateList) 
                 {
-                    if (p.getRight() >= 0) 
-                        newlist.add(p.getLeft());
+                    for(Pair<Integer,Boolean> d : hShakeArray)   
+                    {    
+                        for(Pair<Integer,String> b : interestedArray)   
+                        { 
+                            if (d.getLeft().intValue() == p.getLeft().intValue() && b.getLeft().intValue() == p.getLeft().intValue() && d.getRight() && b.getRight() == "Interested")   
+                            { 
+                                newlist.add(p.getLeft());
+                            }
+                        }
+                    }
+                   
                 }
             
             } 
@@ -132,15 +138,15 @@ public class PeerInfo {
             }
             if (newlist.isEmpty())
             {
-                System.out.println("newlist.isEmpty");
                 return null;
             }
-            Collections.sort(newlist);
-            Integer[] highDownloads = new Integer[Common.Peers.size() - 1];
-            for(int i = 0; i < Common.Peers.size() - 1; i++) 
+            Collections.sort(newlist, Collections.reverseOrder());
+            Integer[] highDownloads = new Integer[Common.NumberOfPreferredNeighbors <= newlist.size() ? Common.NumberOfPreferredNeighbors : newlist.size()];
+            for(int i = 0; i < highDownloads.length; i++) 
             {
                 highDownloads[i] = newlist.get(i);
             }
+            
             return highDownloads;
         }
 
@@ -156,7 +162,6 @@ public class PeerInfo {
                     if (p.PeerId != MyPeerId)
                         dRateList.add(new PeerInfo.Pair<Integer, Integer>(p.PeerId, 0));
                 }
-                
             } 
             catch (Exception e) 
             {
@@ -176,9 +181,9 @@ public class PeerInfo {
             int count = 0;
             for(Pair<Integer, Integer> p : dRateList)
             {
-                if (p.getLeft() == peer)
+                if (p.getLeft().intValue() == peer.intValue())
                 {
-                    dRateList.get(count).setRight(rate);                
+                    dRateList.get(count).setRight(dRateList.get(count).getRight() + rate);                
                 }
                 count ++;
             }
@@ -192,6 +197,7 @@ public class PeerInfo {
         // True = unchoked
         // False = choked
         public static List<Pair<Integer, Boolean>> unchokedNeighbors = new ArrayList<Pair<Integer, Boolean>>();
+        static int iteration = 2;
 
         public UnchokedNeighbors() 
         {
@@ -222,26 +228,56 @@ public class PeerInfo {
 
         public static void setUnchokedNeighbors(Integer[] pIds) 
         {
-
+            pReadWriteLock.writeLock().lock();
+            for (int i = 0; i < requestedArray.size() - 1; i++) 
+            {
+                int[] temp = requestedArray.get(i);
+                if (temp[1] >= iteration && temp[0] == 1)
+                {
+                    temp = new int[]{0,0};                    
+                }
+                else if (temp[0] == 1 && temp[1] < iteration )
+                {
+                    temp = new int[]{temp[0],temp[1] + 1};
+                }
+                requestedArray.set(i, temp);
+            }
+            pReadWriteLock.writeLock().unlock();
             if (pIds == null)
+            {
+                //System.out.println("setUnchokedNeighbors pIds Null");
                 return;
+            }
+            if (PeerInfo.MyHasFile) 
+            {
+                List<Pair<Integer,String>> randList = new ArrayList<>();
+                //randomly select who to unchoke from those peers that are interested
+                for (Pair<Integer,String> p : interestedArray) 
+                {
+                    if (p.getRight().equals("Interested"))
+                    {
+                        randList.add(p);
+                    }
+                }
+                Integer[] rand = new Integer[Common.NumberOfPreferredNeighbors <= randList.size() ? Common.NumberOfPreferredNeighbors : randList.size()];
+                for (int i = 0; i < rand.length; i++) 
+                {
+                    Collections.shuffle(randList);
+                    rand[i] = randList.remove(0).getLeft();
+                }
+                pIds = rand;
+            }
+            
             for (int i = 0; i < unchokedNeighbors.size(); i++) 
             {
                 Pair<Integer, Boolean> p = unchokedNeighbors.get(i);
                 boolean modified = false;
                 for (Integer id : pIds) 
                 {
-                    if (p.getLeft() == id) 
-                    {
-                        for(Pair<Integer,Boolean> d : hShakeArray)   
-                        {    
-                            if (d.getLeft() == id && d.getRight())   
-                            {                                                            
-                                System.out.println("setting unchoked for: " + id);
-                                unchokedNeighbors.get(i).setRight(true);
-                                modified = true;
-                            }
-                        }
+                    if (id != null && p.getLeft().intValue() == id.intValue()) 
+                    {                         
+                        unchokedNeighbors.get(i).setRight(true);
+                        modified = true;                            
                     }
                 }
                 if (!modified) 
@@ -250,28 +286,24 @@ public class PeerInfo {
                 }
 
             }
-
+            
             return;
         }
 
         public static void setOptUnchoked(Integer pId) 
         {
             if (pId == null)
+            {
+                //System.out.println("setOptUnchoked pId Null");
                 return;
+            }
             for (int i = 0; i < unchokedNeighbors.size(); i++) 
             {
                 Pair<Integer, Boolean> p = unchokedNeighbors.get(i);
 
-                if (p.getLeft() == pId) 
+                if (p.getLeft().intValue() == pId.intValue()) 
                 {
-                    for(Pair<Integer,Boolean> d : hShakeArray)   
-                    {    
-                        if (d.getLeft() == pId && d.getRight())   
-                        { 
-                            System.out.println("setting Optunchoked for: " + pId);
-                            unchokedNeighbors.get(i).setRight(true);
-                        }
-                    }
+                    unchokedNeighbors.get(i).setRight(true);                        
                 }
             }
 
@@ -280,21 +312,26 @@ public class PeerInfo {
 
         public static Integer getOptUnchoked() 
         {
-            Random r = new Random();
-            boolean found = false;
-            int a;
-            if (unchokedNeighbors.size() == 0)
-                return null;
-            do 
-            {
-                a = r.nextInt(unchokedNeighbors.size());
-                if (!unchokedNeighbors.get(a).getRight()) 
-                {
-                    found = true;
-                }
-            } while (!found);
 
-            return unchokedNeighbors.get(a).getLeft();
+            List<Pair<Integer,String>> randList = new ArrayList<>();
+            //randomly select who to unchoke from those peers that are interested
+            for (Pair<Integer,String> p : interestedArray) 
+            {
+                for (Pair<Integer,Boolean> pair : unchokedNeighbors) 
+                {
+                    if (p.getRight().equals("Interested") && pair.getLeft().intValue() ==  p.getLeft().intValue() && pair.getRight())
+                    {
+                        System.out.println(p.getLeft());
+                        randList.add(p);
+                    }
+                }
+            }            
+            if (randList.size() > 0)
+            {
+                Collections.shuffle(randList);
+                return randList.get(0).getLeft();
+            }
+            return null;
 
         }
 
@@ -385,15 +422,21 @@ public class PeerInfo {
             if (this.HasFile)
                 init.flip(0,Common.Piece);
             this.FileBits = init;
-            
             Pair<Integer,Boolean> pair = new Pair<Integer,Boolean>(this.PeerId,false);
             Pair<Integer,String> pair1 = new Pair<Integer,String>(this.PeerId,"NotInterested");
-            Pair<Integer,BitSet> pair2 = new Pair<Integer,BitSet>(this.PeerId,new BitSet());
+            Pair<Integer,Boolean> pair2 = new Pair<Integer,Boolean>(this.PeerId,false);
             hShakeArray.add(pair);
             interestedArray.add(pair1);
-            bitFieldArray.add(pair2);
-            
-            
+            HasFileArray.add(pair2);  
+            if (!_init_)
+            {                         
+                for (int i = 0; i < Common.Piece; i++) 
+                {
+                int[] insert = new int[]{0,0};
+                requestedArray.add(insert);
+                }
+                _init_ = true;
+            } 
         }
         else
         {
@@ -432,17 +475,17 @@ public class PeerInfo {
         }
     }
 
-    public static void SetBitField(int pid, BitSet value)
+    public static void SetHaveFileArray(int pid, Boolean value)
     {
         Integer peerId = Integer.valueOf(pid);
 
-        for(int i = 0; i< bitFieldArray.size(); i ++)
+        for(int i = 0; i< HasFileArray.size(); i ++)
         {
-            Integer temp = bitFieldArray.get(i).left;
+            Integer temp = HasFileArray.get(i).left;
             if (temp.intValue() == peerId.intValue())
             {
-                Pair<Integer, BitSet> pair = new Pair<Integer, BitSet>(peerId, value);
-                bitFieldArray.set(i, pair);
+                Pair<Integer, Boolean> pair = new Pair<Integer, Boolean>(peerId, value);
+                HasFileArray.set(i, pair);
             }
         }
     }

@@ -113,10 +113,10 @@ public class Message {
     }
 
     // Create 'piece' message
-    public static byte[] createPiece(byte[] indexField) {
+    public static byte[] createPiece(byte[] indexField, int length) {
 
         // Message length will be 5 and the type will be 7
-        msgLength = ByteBuffer.allocate(4).putInt(5).array();
+        msgLength = ByteBuffer.allocate(4).putInt(length).array();
         msgType[0] = 7;
 
         // Return final byte array
