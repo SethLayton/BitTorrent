@@ -23,7 +23,7 @@ public class Log
         {
             
             String timeStamp = LocalTime.now().toString();
-            writer.write(timeStamp + " " + msg.replace(System.lineSeparator(), System.lineSeparator() + "\t"));
+            writer.write(timeStamp + ": " + msg.replace(System.lineSeparator(), System.lineSeparator() + "\t"));
             writer.flush();
         }
         catch(Exception e)

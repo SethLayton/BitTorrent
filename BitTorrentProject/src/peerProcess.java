@@ -67,7 +67,7 @@ public class peerProcess
         if (PeerInfo.MyPeerId != Common.GetLargestPeerId()) {
             ServerSocket listener = new ServerSocket(PeerInfo.MyPortNumber);
             System.out.println("The server is running.");
-            Log.Write("The server is running for: " + PeerInfo.MyHostName);
+            // Log.Write("The server is running for: " + PeerInfo.MyHostName);
             try 
             {
                 while (true) 
@@ -127,6 +127,7 @@ public class peerProcess
                 this.connectedPeer = p;
                 connection = new Socket(connectedPeer.HostName, connectedPeer.PortNumber);
                 client = true;
+                Log.Write(MessageFormat.format("Peer {0} makes a connection to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
             } 
             catch (IOException e) 
             {
@@ -348,7 +349,7 @@ public class peerProcess
                                 {                                    
                                     //Potential need to change here as splitting could give null exception
                                     connectedPeer = PeerInfo.getPeerInfo(Integer.parseInt(Common.removeBadFormat(message.split("0000000000")[1])));
-                                    Log.Write(MessageFormat.format("Peer {0} is connected from Peer {1}", PeerInfo.MyPeerId, connectedPeer.PeerId));
+                                    Log.Write(MessageFormat.format("Peer {0} is connected from Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                     handshakepid = Integer.toString(MyPeer.PeerId).getBytes();
 
                                     sendMessage(Common.concat(Message.handshakeheader,Message.handshakezbits,handshakepid));
@@ -377,6 +378,7 @@ public class peerProcess
                                         case 0: //choke
                                             //What do here? anything? update some running list?
                                             System.out.println("received choke from: " + connectedPeer.PeerId);
+                                            Log.Write(MessageFormat.format("Peer {0} is choked by Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             PeerInfo.myUnChoked = false;
                                             unchoked = false;
                                             break;
@@ -386,6 +388,7 @@ public class peerProcess
                                             //PeerInfo.myUnChoked = true;
                                             unchoked = true;
                                             System.out.println("received unchoke from: " + connectedPeer.PeerId);
+                                            Log.Write(MessageFormat.format("Peer {0} is unchoked by Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             System.out.println("locking write 1 " + connectedPeer.PeerId);
                                             readWriteLock.writeLock().lock();
                                             System.out.println("locked write 1 " + connectedPeer.PeerId);
@@ -488,12 +491,14 @@ public class peerProcess
 
                                         case 2: //interested
                                             System.out.println("received interested from: " + connectedPeer.PeerId);
+                                            Log.Write(MessageFormat.format("Peer {0} received the 'interested' message from Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             PeerInfo.SetInterested(connectedPeer.PeerId, "Interested");
                                             connectedPeer.interested = true;
                                             break;
 
                                         case 3: //not interested
                                             System.out.println("received not interested from: " + connectedPeer.PeerId);
+                                            Log.Write(MessageFormat.format("Peer {0} received the 'not interested' message from Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             PeerInfo.SetInterested(connectedPeer.PeerId, "NotInterested");
                                             connectedPeer.interested = false;
                                             break;
@@ -502,6 +507,7 @@ public class peerProcess
                                             ByteBuffer bb = ByteBuffer.wrap(fields.get(2));
                                             int temp1 = bb.getInt();
                                             System.out.println("received have piece " + temp1 +" from: " + connectedPeer.PeerId);
+                                            Log.Write(MessageFormat.format("Peer {0} received the 'have' message from Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             System.out.println("locking write 2 " + connectedPeer.PeerId);
                                             readWriteLock.writeLock().lock();
                                             System.out.println("locked write 2 " + connectedPeer.PeerId);
@@ -632,7 +638,6 @@ public class peerProcess
                                             break;
 
                                         case 7: //piece
-                                            
                                             ByteBuffer pbb = ByteBuffer.wrap(Arrays.copyOfRange(fields.get(2),0,4));
                                             int pindex = pbb.getInt();
                                             System.out.println("received piece (" + pindex + ") from: " + connectedPeer.PeerId);
@@ -652,10 +657,10 @@ public class peerProcess
                                             // System.out.println("My Filebits: "+ sssssss11);
                                                   
                                             System.arraycopy(fields.get(2), 4, PeerInfo.MyFile, pindex * Common.PieceSize , Common.PieceSize <= plength ? Common.PieceSize : plength);
-                                            
                                             if (PeerInfo.MyFileBits.nextClearBit(0) >= Common.Piece)
                                             {
                                                 PeerInfo.MyHasFile = true;
+                                                Log.Write("Peer " + PeerInfo.MyPeerId + " has downloaded the complete file.");
                                                 // haveReadWriteLock.writeLock().lock();
                                                 // PeerInfo.SetHaveFileArray(PeerInfo.MyPeerId, PeerInfo.MyHasFile);
                                                 // haveReadWriteLock.writeLock().unlock();
@@ -758,15 +763,28 @@ public class peerProcess
                                             int pieceRequestIndex = 0;
                                             ArrayList<Integer> piecerequestList = new ArrayList<>();
                                             BitSet pieceMyTemp = (BitSet)PeerInfo.MyFileBits.clone();
+                                            
+                                            // Calculate the amount of pieces we have for log
+                                            int current_total = 0;
+                                            for (int i = 0; i < pieceMyTemp.length(); i++) 
+                                            {
+                                                if (pieceMyTemp.get(i)) {
+                                                    current_total++;
+                                                }
+                                            }
+                                            Log.Write(MessageFormat.format("Peer {0} has downloaded the piece {1} from Peer {2}. Now the number of pieces it has is {4}.", PeerInfo.MyPeerId, pindex, connectedPeer.PeerId, current_total));
+                                            
                                             BitSet pieceIncTemp = (BitSet)connectedPeer.FileBits.clone();
                                             pieceMyTemp.xor(pieceIncTemp);
                                             pieceMyTemp.and(pieceIncTemp);
+
 
                                             for (int i = 0; i < pieceMyTemp.length(); i++) 
                                             {
                                                 if (pieceMyTemp.get(i))
                                                     piecerequestList.add(i);
                                             }
+
                                             //if (unchoked)
                                             //{
                                             if (piecerequestList.size() > 0)

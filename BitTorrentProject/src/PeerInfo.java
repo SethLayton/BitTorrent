@@ -12,6 +12,7 @@ import java.lang.Object;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 
 public class PeerInfo {
     // Information about ALL peers. This is updated dynamically while running
@@ -286,6 +287,12 @@ public class PeerInfo {
                 }
 
             }
+            String log_string = MessageFormat.format("Peer {0} has the preferred neighbors ", PeerInfo.MyPeerId);
+            // Log preferred neighbors
+            for (Integer id : pIds) {
+                log_string += id + ",";
+            }
+            Log.Write(log_string.substring(0, log_string.length() - 1) + ".");
             
             return;
         }
@@ -306,7 +313,7 @@ public class PeerInfo {
                     unchokedNeighbors.get(i).setRight(true);                        
                 }
             }
-
+            Log.Write(MessageFormat.format("Peer {0} has the optimistically unchoked neighbor {1}.", PeerInfo.MyPeerId, pId));
             return;
         }
 

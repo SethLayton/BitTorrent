@@ -9,3 +9,5 @@ BitTorrentProject/src/Server.class
 BitTorrentProject/src/Server$Handler.class
 *.log
 *.class
+*.DS_Store
+BitTorrentProject/.vscode/
