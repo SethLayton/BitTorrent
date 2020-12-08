@@ -69,9 +69,7 @@ public class peerProcess
         // open connection for future peers to connect if its not the last to start
         if (PeerInfo.MyPeerId != Common.GetLargestPeerId()) {
             ServerSocket listener = new ServerSocket(PeerInfo.MyPortNumber);
-            listener.setSoTimeout(100*1000);
             System.out.println("The server is running.");
-            // Log.Write("The server is running for: " + PeerInfo.MyHostName);
             try 
             {                
                 while (!ending) 
@@ -142,7 +140,6 @@ public class peerProcess
             } 
             catch (IOException e) 
             {
-                //System.err.println("Connection closed with: " + connectedPeer.HostName);
                 PeerInfo.SetHandshake(connectedPeer.PeerId, false);
                 choke.stopInterval();
                 System.exit(0);
@@ -352,7 +349,6 @@ public class peerProcess
                         {
                             for (PeerInfo.Pair<Integer,Boolean> hfa : PeerInfo.HasFileArray) 
                             {
-                                //System.out.println(hfa.getLeft().intValue() + " " + hfa.getRight());
                                 if (!hfa.getRight())
                                 {
                                     has = false;
@@ -751,7 +747,7 @@ public class peerProcess
                                                     current_total++;
                                                 }
                                             }
-                                            Log.Write(MessageFormat.format("Peer {0} has downloaded the piece {1} from Peer {2}. Now the number of pieces it has is {4}.", PeerInfo.MyPeerId, pindex, connectedPeer.PeerId, current_total));
+                                            Log.Write(MessageFormat.format("Peer {0} has downloaded the piece {1} from Peer {2}. Now the number of pieces it has is {3}.", PeerInfo.MyPeerId, pindex, connectedPeer.PeerId, current_total));
                                             
                                             BitSet pieceIncTemp = (BitSet)connectedPeer.FileBits.clone();
                                             pieceMyTemp.xor(pieceIncTemp);
@@ -784,7 +780,6 @@ public class peerProcess
                                                 {
                                                     while (rinp[0] == 1 && !complete && !allRequested)
                                                     {
-                                                        //System.out.println("x " + connectedPeer.PeerId);
                                                         pieceRequestIndex = piecerequestList.get(new Random().nextInt(piecerequestList.size())).intValue();
                                                         rinp =  PeerInfo.requestedArray.get(pieceRequestIndex);
                                                         if (rinp[0] != 1)
@@ -867,7 +862,6 @@ public class peerProcess
             finally
             {
                 //Close connections
-                //System.out.println("Disconnect with Client ");
                 try
                 {
                     in.close();
@@ -883,7 +877,6 @@ public class peerProcess
         //send a message to the output stream
         public void sendMessage(byte[] msg) throws IOException
         {
-            //out = new DataOutputStream(connection.getOutputStream());
             try
             {
                 out.writeInt(msg.length);
@@ -892,7 +885,6 @@ public class peerProcess
             }
             catch(IOException ioException)
             {
-                //ioException.printStackTrace();
             }
         }
     }

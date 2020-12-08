@@ -19,11 +19,15 @@ public class Log
     
     public static void Write(String msg)
     {
+        if (_logPath == null)
+        {
+            LogPath();
+        }
         //System.out.println("logging: " + msg);
         try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(LogPath()), true)))
         {            
             String timeStamp = LocalTime.now().toString();
-            writer.write(timeStamp + ": " + msg + "\n");
+            writer.write(timeStamp + ": " + msg.replace(",","") + "\n");
             writer.flush();
             
             //System.out.println("logged");

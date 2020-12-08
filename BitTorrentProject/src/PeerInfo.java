@@ -376,6 +376,11 @@ public class PeerInfo {
                     MyFileBits = init;
 
                 }
+                Log.Write("Reading Common.cfg file");
+                Log.Write(MessageFormat.format("Common.cfg specifies an unchoking interval of {0}", Common.UnchokingInterval));
+                Log.Write(MessageFormat.format("Common.cfg specifies an optimistically unchoking interval of {0}", Common.OptimisticUnchokingInterval));
+                Log.Write(MessageFormat.format("Common.cfg specifies a file size of {0}", Common.FileSize));
+                Log.Write(MessageFormat.format("Common.cfg specifies a piece size of {0}", Common.PieceSize));
                 _init = true;
                 return pInfo;
             }

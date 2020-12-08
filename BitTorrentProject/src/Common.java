@@ -38,20 +38,19 @@ public class Common
         {
             if (!_cinit)
             {
-                localtest = java.net.InetAddress.getLocalHost().toString().split("/")[0].equals("Seths-PC");
+                localtest = java.net.InetAddress.getLocalHost().toString().split("/")[0].equals("");
                 comProperties.load(new FileInputStream(localtest ? "BitTorrentProject/src/Common.cfg" : "Common.cfg"));                    
-                Log.Write("Reading Common.cfg file");
+                
                 NumberOfPreferredNeighbors = Integer.parseInt(comProperties.get("NumberOfPreferredNeighbors").toString());
-                Log.Write(MessageFormat.format("Common.cfg specifies {0} preferred neighors", Integer.parseInt(comProperties.get("NumberOfPreferredNeighbors").toString())));
                 UnchokingInterval = Integer.parseInt(comProperties.get("UnchokingInterval").toString());
-                Log.Write(MessageFormat.format("Common.cfg specifies an unchoking interval of {0}", Integer.parseInt(comProperties.get("UnchokingInterval").toString())));
+                
                 OptimisticUnchokingInterval = Integer.parseInt(comProperties.get("OptimisticUnchokingInterval").toString());
                 FileName = comProperties.get("FileName").toString();
-                Log.Write(MessageFormat.format("Common.cfg specifies an optimistically unchoking interval of {0}", comProperties.get("FileName").toString()));
+                
                 FileSize = Integer.parseInt(comProperties.get("FileSize").toString());
-                Log.Write(MessageFormat.format("Common.cfg specifies a file size of {0}", Integer.parseInt(comProperties.get("FileSize").toString())));
+                
                 PieceSize = Integer.parseInt(comProperties.get("PieceSize").toString());
-                Log.Write(MessageFormat.format("Common.cfg specifies a piece size of {0}", Integer.parseInt(comProperties.get("PieceSize").toString())));
+                
                 Piece = (int)(Math.ceil((double)FileSize/PieceSize));
                 
                 _cinit = true;
@@ -82,7 +81,7 @@ public class Common
                     PeerIds.add(Integer.parseInt(data[0]));
                 }
                 myReader.close();
-
+                
                 _pinit = true;
             }
         } 
