@@ -320,6 +320,7 @@ public class PeerInfo {
         public static Integer getOptUnchoked() 
         {
 
+            System.out.println("getting");
             List<Pair<Integer,String>> randList = new ArrayList<>();
             //randomly select who to unchoke from those peers that are interested
             for (Pair<Integer,String> p : interestedArray) 
@@ -372,6 +373,7 @@ public class PeerInfo {
                         Path path = Paths.get("peer_" + MyPeerId + "/" + Common.FileName);
                         MyFile = Files.readAllBytes(path);
                         init.flip(0, Common.Piece);
+                        SetHaveFileArray(MyPeerId, true);
                     }
                     MyFileBits = init;
 
@@ -404,6 +406,7 @@ public class PeerInfo {
                         Path path = Paths.get("../" + Common.FileName);
                         MyFile = Files.readAllBytes(path);
                         init.flip(0,Common.Piece);
+                        SetHaveFileArray(MyPeerId, true);
                     }
                     MyFileBits = init;
                 }

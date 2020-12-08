@@ -13,9 +13,11 @@ public class ChokingInterval {
 	public int optUnchokedPeerIndex;
 	public int chokingInterval;
 	public int optUnchokedInterval;
+	public Timer timer = new Timer();
 
 	public ChokingInterval(int numPreferredPeers,int numPeers, int chokingInterval, int optUnchokedInterval)
 	{
+		System.out.println("choking constr");
 		this.numPeers = numPeers;
 		this.numPreferredPeers = numPreferredPeers;
 		this.chokedPeers = new boolean[numPeers];
@@ -26,12 +28,16 @@ public class ChokingInterval {
 		PeerInfo.UnchokedNeighbors ucn = new PeerInfo.UnchokedNeighbors();
 		PeerInfo.DownloadRate dlr = new PeerInfo.DownloadRate();
 
-		Timer timer = new Timer();
+		
 		TimerTask unchokeTask = new Unchoke(sem);
 		TimerTask optUnchoke = new OptUnchoke(sem);
 		timer.schedule(unchokeTask, 0, this.chokingInterval * 1000);
 		timer.schedule(optUnchoke, 0, this.optUnchokedInterval * 1000);
 
+	}
+	public void stopInterval() {
+		timer.cancel();
+		timer.purge();
 	}
 
 	class OptUnchoke extends TimerTask 
@@ -49,7 +55,7 @@ public class ChokingInterval {
 			{
 				sem.acquire();
 				Integer pId = PeerInfo.UnchokedNeighbors.getOptUnchoked();
-				System.out.println("----------------------------Setting optUnchoked for: " + 
+				System.out.println("Setting optUnchoked for: " + 
 				(pId == null ? "null" : pId.intValue()));
 				PeerInfo.UnchokedNeighbors.setOptUnchoked(pId);
 				

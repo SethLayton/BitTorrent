@@ -5,7 +5,6 @@ JC = javac
 		$(JC) $(JFLAGS) $*.java
 
 CLASSES = \
-		Client.java \
 		peerProcess.java \
 		PeerInfo.java \
 		ChokingInterval.java \
