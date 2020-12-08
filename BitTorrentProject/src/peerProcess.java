@@ -52,7 +52,7 @@ public class peerProcess
                 {
                     if (p.PeerId < PeerInfo.MyPeerId) 
                     {
-                        //System.out.println("Attempting to connect to client: " + p.PeerId + " " + p.HostName);
+                        Log.Write(MessageFormat.format("Peer {0} makes a connection to Peer {1}.", PeerInfo.MyPeerId, p.PeerId));
                         new Handler(p, MyPeer).start();
                     }
                 }
@@ -85,6 +85,7 @@ public class peerProcess
             }
             finally 
             {
+                Log.Write("All peers have the complete file, closing.");
                 listener.close();
             }
         }
@@ -138,7 +139,6 @@ public class peerProcess
                 this.connectedPeer = p;
                 connection = new Socket(connectedPeer.HostName, connectedPeer.PortNumber);
                 client = true;
-                Log.Write(MessageFormat.format("Peer {0} makes a connection to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
             } 
             catch (IOException e) 
             {
@@ -182,6 +182,7 @@ public class peerProcess
                                         {
                                             //send unchoked
                                             System.out.println("Sending unchoke to " + connectedPeer.PeerId);
+                                            Log.Write(MessageFormat.format("Peer {0} sends 'unchoke' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             sendMessage(Message.createUnchoke());
                                             connectedPeer.peerUnChoked = !connectedPeer.peerUnChoked;
                                         }
@@ -189,6 +190,7 @@ public class peerProcess
                                         {
                                             //send choked
                                             System.out.println("Sending  choke to " + connectedPeer.PeerId);
+                                            Log.Write(MessageFormat.format("Peer {0} sends 'choke' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             sendMessage(Message.createChoke());
                                             connectedPeer.peerUnChoked = !connectedPeer.peerUnChoked;
                                         }
@@ -203,10 +205,12 @@ public class peerProcess
                                     {
                                         int sMsg = queue1.poll().intValue();
                                         System.out.println("Sending have piece " + sMsg + " to peer: " + connectedPeer.PeerId);
+                                        Log.Write(MessageFormat.format("Peer {0} sends 'have' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                         sendMessage(Message.createHave(ByteBuffer.allocate(4).putInt(sMsg).array()));
                                     }
                                     if (PeerInfo.MyFileBits.nextClearBit(0) >= Common.Piece && !ib1)
                                     {
+                                            Log.Write(MessageFormat.format("Peer {0} sends 'not interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             sendMessage(Message.createNotInterested());
                                             ib1 = true;
                                     }
@@ -216,11 +220,13 @@ public class peerProcess
                                     {
                                         int sMsg = queue2.poll().intValue();
                                         System.out.println("Sending have piece " + sMsg + " to peer: " + connectedPeer.PeerId);
+                                        Log.Write(MessageFormat.format("Peer {0} sends 'have' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                         sendMessage(Message.createHave(ByteBuffer.allocate(4).putInt(sMsg).array()));
                                         
                                     }
                                     if (PeerInfo.MyFileBits.nextClearBit(0) >= Common.Piece && !ib2)
                                     {
+                                            Log.Write(MessageFormat.format("Peer {0} sends 'not interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             sendMessage(Message.createNotInterested());
                                             ib2 = true;
                                     }
@@ -230,11 +236,13 @@ public class peerProcess
                                     {
                                         int sMsg = queue3.poll().intValue();
                                         System.out.println("Sending have piece " + sMsg + " to peer: " + connectedPeer.PeerId);
+                                        Log.Write(MessageFormat.format("Peer {0} sends 'have' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                         sendMessage(Message.createHave(ByteBuffer.allocate(4).putInt(sMsg).array()));
                                         
                                     }
                                     if (PeerInfo.MyFileBits.nextClearBit(0) >= Common.Piece && !ib3)
                                     {
+                                            Log.Write(MessageFormat.format("Peer {0} sends 'not interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             sendMessage(Message.createNotInterested());
                                             ib3 = true;
                                     }
@@ -244,11 +252,13 @@ public class peerProcess
                                     {
                                         int sMsg = queue4.poll().intValue();
                                         System.out.println("Sending have piece " + sMsg + " to peer: " + connectedPeer.PeerId);
+                                        Log.Write(MessageFormat.format("Peer {0} sends 'have' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                         sendMessage(Message.createHave(ByteBuffer.allocate(4).putInt(sMsg).array()));
                                         
                                     }
                                     if (PeerInfo.MyFileBits.nextClearBit(0) >= Common.Piece && !ib4)
                                     {
+                                            Log.Write(MessageFormat.format("Peer {0} sends 'not interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             sendMessage(Message.createNotInterested());
                                             ib4 = true;
                                     }
@@ -258,11 +268,13 @@ public class peerProcess
                                     {
                                         int sMsg = queue5.poll().intValue();
                                         System.out.println("Sending have piece " + sMsg + " to peer: " + connectedPeer.PeerId);
+                                        Log.Write(MessageFormat.format("Peer {0} sends 'have' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                         sendMessage(Message.createHave(ByteBuffer.allocate(4).putInt(sMsg).array()));
                                         
                                     }
                                     if (PeerInfo.MyFileBits.nextClearBit(0) >= Common.Piece && !ib5)
                                     {
+                                            Log.Write(MessageFormat.format("Peer {0} sends 'not interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             sendMessage(Message.createNotInterested());
                                             ib5 = true;
                                     }
@@ -272,11 +284,13 @@ public class peerProcess
                                     {
                                         int sMsg = queue6.poll().intValue();
                                         System.out.println("Sending have piece " + sMsg + " to peer: " + connectedPeer.PeerId);
+                                        Log.Write(MessageFormat.format("Peer {0} sends 'have' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                         sendMessage(Message.createHave(ByteBuffer.allocate(4).putInt(sMsg).array()));
                                         
                                     }
                                     if (PeerInfo.MyFileBits.nextClearBit(0) >= Common.Piece && !ib6)
                                     {
+                                            Log.Write(MessageFormat.format("Peer {0} sends 'not interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             sendMessage(Message.createNotInterested());
                                             ib6 = true;
                                     }
@@ -286,11 +300,13 @@ public class peerProcess
                                     {
                                         int sMsg = queue7.poll().intValue();
                                         System.out.println("Sending have piece " + sMsg + " to peer: " + connectedPeer.PeerId);
+                                        Log.Write(MessageFormat.format("Peer {0} sends 'have' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                         sendMessage(Message.createHave(ByteBuffer.allocate(4).putInt(sMsg).array()));
                                         
                                     }
                                     if (PeerInfo.MyFileBits.nextClearBit(0) >= Common.Piece && !ib7)
                                     {
+                                            Log.Write(MessageFormat.format("Peer {0} sends 'not interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             sendMessage(Message.createNotInterested());
                                             ib7 = true;
                                     }
@@ -300,11 +316,13 @@ public class peerProcess
                                     {
                                         int sMsg = queue8.poll().intValue();
                                         System.out.println("Sending have piece " + sMsg + " to peer: " + connectedPeer.PeerId);
+                                        Log.Write(MessageFormat.format("Peer {0} sends 'have' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                         sendMessage(Message.createHave(ByteBuffer.allocate(4).putInt(sMsg).array()));
                                         
                                     }
                                     if (PeerInfo.MyFileBits.nextClearBit(0) >= Common.Piece && !ib8)
                                     {
+                                            Log.Write(MessageFormat.format("Peer {0} sends 'not interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             sendMessage(Message.createNotInterested());
                                             ib8 = true;
                                     }
@@ -314,11 +332,13 @@ public class peerProcess
                                     {
                                         int sMsg = queue9.poll().intValue();
                                         System.out.println("Sending have piece " + sMsg + " to peer: " + connectedPeer.PeerId);
+                                        Log.Write(MessageFormat.format("Peer {0} sends 'have' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                         sendMessage(Message.createHave(ByteBuffer.allocate(4).putInt(sMsg).array()));
                                         
                                     }
                                     if (PeerInfo.MyFileBits.nextClearBit(0) >= Common.Piece && !ib9)
                                     {
+                                            Log.Write(MessageFormat.format("Peer {0} sends 'not interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             sendMessage(Message.createNotInterested());
                                             ib9 = true;
                                     }
@@ -361,6 +381,7 @@ public class peerProcess
                         if (client && (connectedPeer == null || !PeerInfo.isHandShake(connectedPeer.PeerId)))
                         {
                             handshakepid = Integer.toString(MyPeer.PeerId).getBytes();
+                            Log.Write(MessageFormat.format("Peer {0} sends 'handshake' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                             sendMessage(Common.concat(Message.handshakeheader,Message.handshakezbits,handshakepid));
                         }
                         int length = 0;
@@ -379,12 +400,13 @@ public class peerProcess
                                 ArrayList<byte[]> fields = Message.parseMessage(data);
                                 message = new String(data);
                                 if(message.contains("P2PFILESHARINGPROJ") && (connectedPeer == null || !PeerInfo.isHandShake(connectedPeer.PeerId)))
-                                {                                    
+                                {                     
+                                    Log.Write(MessageFormat.format("Peer {0} receives handshake from Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));               
                                     //Potential need to change here as splitting could give null exception
                                     connectedPeer = PeerInfo.getPeerInfo(Integer.parseInt(Common.removeBadFormat(message.split("0000000000")[1])));
                                     Log.Write(MessageFormat.format("Peer {0} is connected from Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                     handshakepid = Integer.toString(MyPeer.PeerId).getBytes();
-
+                                    Log.Write(MessageFormat.format("Peer {0} sends 'handshake' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                     sendMessage(Common.concat(Message.handshakeheader,Message.handshakezbits,handshakepid));
                                     PeerInfo.SetHandshake(connectedPeer.PeerId, true);                                
                                                                     
@@ -402,6 +424,7 @@ public class peerProcess
                                         //System.out.println("unlocked 1 " + connectedPeer.PeerId);
 
                                         //System.out.println("sending bitfield to: " + connectedPeer.PeerId);
+                                        Log.Write(MessageFormat.format("Peer {0} sends 'bitfield' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                         sendMessage(Message.createBitfield(MyFileBitsClone));
                                         bitSent = true;
                                     }
@@ -476,6 +499,7 @@ public class peerProcess
                                                         rinp[1] = 0;
                                                         PeerInfo.requestedArray.set(index, rinp);
                                                         System.out.println("sending request piece (" + index + ") to: " + connectedPeer.PeerId);
+                                                        Log.Write(MessageFormat.format("Peer {0} sends 'request' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                         sendMessage(Message.createRequest(index));
                                                 }
                                                 else
@@ -491,6 +515,7 @@ public class peerProcess
                                                             rinp[1] = 0;
                                                             PeerInfo.requestedArray.set(index, rinp);
                                                             System.out.println("sending request piece (" + index + ") to: " + connectedPeer.PeerId);
+                                                            Log.Write(MessageFormat.format("Peer {0} sends 'request' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                             sendMessage(Message.createRequest(index));
                                                             complete = true;
                                                         }
@@ -511,6 +536,7 @@ public class peerProcess
                                                             index = requestList.get(new Random().nextInt(requestList.size())).intValue();
                                                             PeerInfo.requestedArray.set(index, rinp);
                                                             System.out.println("sending request piece (" + index + ") to: " + connectedPeer.PeerId);
+                                                            Log.Write(MessageFormat.format("Peer {0} sends 'request' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                             sendMessage(Message.createRequest(index)); 
                                                         }
                                                     }
@@ -570,16 +596,19 @@ public class peerProcess
                                             if (haveRequestList.size() > 0)
                                             {
                                                 System.out.println("sending interested to: " + connectedPeer.PeerId);
+                                                Log.Write(MessageFormat.format("Peer {0} sends 'interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                 sendMessage(Message.createInterested());
                                             }
                                             else 
                                             {
                                                 System.out.println("sending NotInterested to: " + connectedPeer.PeerId);
+                                                Log.Write(MessageFormat.format("Peer {0} sends 'not interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                 sendMessage(Message.createNotInterested());
                                             } 
                                             break;
 
                                         case 5: //bitfield
+                                            Log.Write(MessageFormat.format("Peer {0} receives bitfield from Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                             //System.out.println("received bitfield from: " + connectedPeer.PeerId);
                                             connectedPeer.FileBits = BitSet.valueOf(fields.get(2));
                                             if (connectedPeer.FileBits.nextClearBit(0) >= Common.Piece)
@@ -603,6 +632,7 @@ public class peerProcess
                                                 //System.out.println("unlocked read 2 " + connectedPeer.PeerId);
 
                                                 //System.out.println("sending bitfield to: " + connectedPeer.PeerId);
+                                                Log.Write(MessageFormat.format("Peer {0} sends 'bitfield' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                 sendMessage(Message.createBitfield(BitFieldMyFileBitsClone));
                                                 BitSet temp2 = (BitSet)connectedPeer.FileBits.clone();
                                                 temp.xor(temp2);                                            
@@ -610,11 +640,13 @@ public class peerProcess
                                                 if (!temp2.isEmpty())
                                                 {
                                                     System.out.println("sending interested to: " + connectedPeer.PeerId);
+                                                    Log.Write(MessageFormat.format("Peer {0} sends 'interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                     sendMessage(Message.createInterested());
                                                 }
                                                 else
                                                 {
                                                     System.out.println("sending not interested to: " + connectedPeer.PeerId);
+                                                    Log.Write(MessageFormat.format("Peer {0} sends 'not interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                     sendMessage(Message.createNotInterested());
                                                 }
                                                 bitSent = true;
@@ -634,11 +666,13 @@ public class peerProcess
                                                 if (!temp2.isEmpty())
                                                 {
                                                     System.out.println("sending interested to: " + connectedPeer.PeerId);
+                                                    Log.Write(MessageFormat.format("Peer {0} sends 'interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                     sendMessage(Message.createInterested());
                                                 }
                                                 else
                                                 {
                                                     System.out.println("sending not interested to: " + connectedPeer.PeerId);
+                                                    Log.Write(MessageFormat.format("Peer {0} sends 'not interested' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                     sendMessage(Message.createNotInterested());
                                                 }
 
@@ -654,6 +688,7 @@ public class peerProcess
                                                 int rstart = rindex * Common.PieceSize;
                                                 byte[] filechunk = Arrays.copyOfRange(PeerInfo.MyFile, rstart, (rstart + Common.PieceSize > Common.FileSize ? Common.FileSize : rstart + Common.PieceSize));
                                                 System.out.println("sending piece (" + rindex + ") to: " + connectedPeer.PeerId);
+                                                Log.Write(MessageFormat.format("Peer {0} sends 'piece' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                 sendMessage(Message.createPiece(Common.concat(fields.get(2), filechunk), filechunk.length), connectedPeer.PeerId);
                                                 PeerInfo.DownloadRate.setDownloadRate(connectedPeer.PeerId, filechunk.length);
                                                 //System.out.println("Completed setting download for: " + connectedPeer.PeerId);
@@ -827,6 +862,7 @@ public class peerProcess
                                                     rinp[1] = 0;
                                                     PeerInfo.requestedArray.set(pieceRequestIndex, rinp);
                                                     System.out.println("sending request piece (" + pieceRequestIndex + ") to: " + connectedPeer.PeerId);
+                                                    Log.Write(MessageFormat.format("Peer {0} sends 'request' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                     sendMessage(Message.createRequest(pieceRequestIndex));
                                                 }
                                                 else
@@ -842,6 +878,7 @@ public class peerProcess
                                                             rinp[1] = 0;
                                                             PeerInfo.requestedArray.set(pieceRequestIndex, rinp);
                                                             System.out.println("sending request piece (" + pieceRequestIndex + ") to: " + connectedPeer.PeerId);
+                                                            Log.Write(MessageFormat.format("Peer {0} sends 'request' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                             sendMessage(Message.createRequest(pieceRequestIndex));
                                                             complete = true;
                                                         }
@@ -862,6 +899,7 @@ public class peerProcess
                                                             pieceRequestIndex = piecerequestList.get(new Random().nextInt(piecerequestList.size())).intValue();
                                                             PeerInfo.requestedArray.set(pieceRequestIndex, rinp);
                                                             System.out.println("sending request piece (" + pieceRequestIndex + ") to: " + connectedPeer.PeerId);
+                                                            Log.Write(MessageFormat.format("Peer {0} sends 'request' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
                                                             sendMessage(Message.createRequest(pieceRequestIndex)); 
                                                         }
                                                     }
