@@ -12,18 +12,18 @@ public class Log
     public static String LogPath()
     { 
         if (_logPath == null) 
-            _logPath = "BitTorrentProject/peer_{0}_{1}.log"; 
+            _logPath = "Log_peer_{0}.log"; 
         String ret = MessageFormat.format(_logPath, String.valueOf(PeerInfo.MyPeerId), LocalDate.now());
         return ret;
     }
     
     public static void Write(String msg)
     {
-        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(LogPath()), true)))
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(LogPath()), false)))
         {
             
             String timeStamp = LocalTime.now().toString();
-            writer.write(timeStamp + ": " + msg.replace(System.lineSeparator(), System.lineSeparator() + "\t"));
+            writer.write(timeStamp + ": " + msg + "\n");
             writer.flush();
         }
         catch(Exception e)

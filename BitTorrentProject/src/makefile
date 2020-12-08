@@ -9,7 +9,8 @@ CLASSES = \
 		PeerInfo.java \
 		ChokingInterval.java \
 		Message.java \
-		Common.java
+		Common.java \
+		Log.java
 
 default: classes
 
