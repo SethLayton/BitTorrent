@@ -69,7 +69,7 @@ public class peerProcess
         // open connection for future peers to connect if its not the last to start
         if (PeerInfo.MyPeerId != Common.GetLargestPeerId()) {
             ServerSocket listener = new ServerSocket(PeerInfo.MyPortNumber);
-            listener.setSoTimeout(7*1000);
+            listener.setSoTimeout(100*1000);
             System.out.println("The server is running.");
             // Log.Write("The server is running for: " + PeerInfo.MyHostName);
             try 
@@ -352,6 +352,7 @@ public class peerProcess
                         {
                             for (PeerInfo.Pair<Integer,Boolean> hfa : PeerInfo.HasFileArray) 
                             {
+                                //System.out.println(hfa.getLeft().intValue() + " " + hfa.getRight());
                                 if (!hfa.getRight())
                                 {
                                     has = false;
@@ -370,8 +371,8 @@ public class peerProcess
                             {
                                 System.out.println("ending");
                                 ending = true;
-                                //in.close();
-                                //out.close();
+                                in.close();
+                                out.close();
                                 choke.stopInterval();
                                 this.interrupt();                            
                                 return;
@@ -421,7 +422,7 @@ public class peerProcess
                                         Log.Write(MessageFormat.format("Peer {0} sends 'bitfield' to Peer {1}.", PeerInfo.MyPeerId, (connectedPeer != null ? connectedPeer.PeerId : "")));
                                         sendMessage(Message.createBitfield(MyFileBitsClone));
                                         bitSent = true;
-                                    }                 
+                                    }             
                                     switch (fields.get(1)[0])
                                     {
                                         case 0: //choke
@@ -442,8 +443,6 @@ public class peerProcess
                                             BitSet incTemp = (BitSet)connectedPeer.FileBits.clone();
                                             myTemp.xor(incTemp);
                                             myTemp.and(incTemp);
-
-
 
                                             for (int i = 0; i < myTemp.length(); i++) 
                                             {
@@ -637,7 +636,7 @@ public class peerProcess
                                                 byte[] filechunk = Arrays.copyOfRange(PeerInfo.MyFile, rstart, (rstart + Common.PieceSize > Common.FileSize ? Common.FileSize : rstart + Common.PieceSize));
                                                 System.out.println("sending piece (" + rindex + ") to: " + connectedPeer.PeerId);
                                                 Log.Write(MessageFormat.format("Peer {0} sends 'piece' to Peer {1}.", PeerInfo.MyPeerId, connectedPeer.PeerId));
-                                                sendMessage(Message.createPiece(Common.concat(fields.get(2), filechunk), filechunk.length), connectedPeer.PeerId);
+                                                sendMessage(Message.createPiece(Common.concat(fields.get(2), filechunk), filechunk.length));
                                                 PeerInfo.DownloadRate.setDownloadRate(connectedPeer.PeerId, filechunk.length);
                                             }
                                             else
@@ -895,29 +894,6 @@ public class peerProcess
             {
                 //ioException.printStackTrace();
             }
-        }  
-        public void sendMessage(byte[] msg, int in) throws IOException
-        {
-            try
-            {
-                out.writeInt(msg.length);
-                ArrayList<byte[]> a = Message.parseMessage(msg);
-                ByteBuffer pbb = ByteBuffer.wrap(Arrays.copyOfRange(a.get(2),0,4));
-                out.flush();
-            }
-            catch(Exception e)
-            {
-                System.out.println("Error: " + e.getMessage() + "\n");
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                String sStackTrace = sw.toString();
-                System.out.println();
-            }
-            finally
-            {
-                //out.close();                
-            }
-        }  
+        }
     }
 }

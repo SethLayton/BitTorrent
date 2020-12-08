@@ -19,12 +19,14 @@ public class Log
     
     public static void Write(String msg)
     {
+        //System.out.println("logging: " + msg);
         try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(LogPath()), true)))
-        {
-            
+        {            
             String timeStamp = LocalTime.now().toString();
             writer.write(timeStamp + ": " + msg + "\n");
             writer.flush();
+            
+            //System.out.println("logged");
         }
         catch(Exception e)
         {
